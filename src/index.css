@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    --tw-text-opacity: 0.8;
+    color: rgb(249 250 251 / var(--tw-text-opacity));
+    font-family: 'Exo 2', sans-serif;
+}
