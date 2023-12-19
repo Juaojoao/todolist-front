@@ -3,7 +3,7 @@ import { Progress } from "@material-tailwind/react";
 
 export const CardTodo = () => {
   return (
-    <div className="card-todo w-80 h-44 bg-BlackTheme-card p-5 rounded-xl">
+    <div className="card-todo cursor-pointer w-full h-44 bg-BlackTheme-card p-5 rounded-xl drop-shadow-lg">
       <div className="card-desc">
         <div className="card-desc-wrapper flex flex-col gap-1">
           <h3 className="font-bold">Card Title</h3>

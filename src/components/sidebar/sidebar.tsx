@@ -31,7 +31,7 @@ export const Sidebar: React.FC<Props> = ({ projects }) => {
 
   return (
     <MagicMotion>
-      <div className="sidebar flex h-full w-full ">
+      <div className="sidebar flex h-full">
         <aside className="bg-BlackTheme-aside px-6 pt-6">
           <div className=" flex center justify-center ">
             <button
@@ -43,9 +43,7 @@ export const Sidebar: React.FC<Props> = ({ projects }) => {
           </div>
         </aside>
         <div
-          className={`overflow-auto scroll ${
-            open ? "sidebar-open" : "sidebar-close"
-          }`}
+          className={`overflow-auto ${open ? "sidebar-open" : "sidebar-close"}`}
         >
           <div
             className=" box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between
