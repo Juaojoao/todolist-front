@@ -14,14 +14,21 @@ export const User = {
   image: "https://www.w3schools.com/howto/img_avatar.png",
 };
 
-export const ListProject = [
+export const ProjectData = [
   {
-    name: "Project 1",
+    id: 1,
+    listName: "A fazer",
+    cardProject: [],
+  },
+
+  {
+    id: 2,
+    listName: "Em andamento",
+    cardProject: [],
   },
   {
-    name: "Project 2",
-  },
-  {
-    name: "Project 3",
+    id: 3,
+    listName: "Concluido",
+    cardProject: [],
   },
 ];

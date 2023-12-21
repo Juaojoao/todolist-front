@@ -1,14 +1,13 @@
 import { ButtonComponent } from "../../components/buttons/button";
 import { InputFormComponent } from "../../components/inputs/input-form";
 import { LockIcon } from "../../components/svg/lock";
-import { UserIcon } from "../../components/svg/user";
 import { MailIcon } from "../../components/svg/mail";
 import {
-  avatarFormStyle,
   bodyFormStyle,
   cardStyle,
   formStyle,
   inputErrorStyle,
+  inputSuceessStyle,
 } from "../register/sytles";
 import { useChangeInput } from "../../util/hooks/useChangeInput";
 import { useState } from "react";
@@ -20,6 +19,8 @@ interface FormState {
 }
 
 export const LoginPage = () => {
+  const [isSubmit, setIsSubmit] = useState<boolean>(false);
+
   const initialFormState: FormState = {
     email: "",
     password: "",
@@ -77,36 +78,37 @@ export const LoginPage = () => {
 
     try {
       setTimeout(() => {
+        setIsSubmit(true);
         setIsLoad(false);
-      }, 2000);
+      }, 1000);
     } catch (error) {
       console.log(error);
       setIsLoad(false);
     }
   };
 
+  const handleFieldError = (fieldName: keyof FormState) =>
+    error[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : "";
+
   return (
     <div className={bodyFormStyle}>
       <div className={cardStyle}>
-        <div className={avatarFormStyle}>
-          <UserIcon />
-        </div>
         <form action="" className={formStyle} onSubmit={handleSubmit}>
           <InputFormComponent
             placeholder="Email"
             type="text"
-            icon={<MailIcon className={error.email ? "text-red-500" : ""} />}
+            icon={<MailIcon className={handleFieldError("email")} />}
             onChange={handleInput("email")}
             value={input.email}
-            className={error.email ? inputErrorStyle : ""}
+            className={handleFieldError("email")}
           />
           <InputFormComponent
             placeholder="Password"
             type="password"
-            icon={<LockIcon className={error.password ? "text-red-500" : ""} />}
+            icon={<LockIcon className={handleFieldError("password")} />}
             onChange={handleInput("password")}
             value={input.password}
-            className={error.password ? inputErrorStyle : ""}
+            className={handleFieldError("password")}
           />
 
           <div className="flex flex-col  w-full gap-3">
@@ -116,7 +118,7 @@ export const LoginPage = () => {
             <ButtonComponent>{isLoad ? <SpinSvg /> : "Login"}</ButtonComponent>
           </div>
           <a href="/register" className="uppercase text-sm hover:underline">
-            Create an account
+            Criar Conta
           </a>
         </form>
       </div>

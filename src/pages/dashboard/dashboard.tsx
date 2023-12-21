@@ -1,7 +1,7 @@
-import { HeaderTodo } from "../../components/header-todo/header-todo";
-import { ListTodo } from "../../components/lista-todo/list-todo";
+import { HeaderTodo } from "../../components/header/header";
 import { Sidebar } from "../../components/sidebar/sidebar";
-import { ListProject, User, test } from "./test";
+import { ListTodo } from "./components/list-component";
+import { User, test } from "./test";
 
 export const Dashboard = () => {
   return (
@@ -11,7 +11,7 @@ export const Dashboard = () => {
         <HeaderTodo user={User} />
         <div className="container-cards overflow-x-auto">
           <div className="cards-wrapper py-5">
-            <ListTodo list={ListProject} />
+            <ListTodo />
           </div>
         </div>
       </div>
