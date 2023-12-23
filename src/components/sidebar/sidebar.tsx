@@ -2,7 +2,6 @@ import "./style.css";
 import React, { useState } from "react";
 import { MoreSvg } from "../svg/more";
 import { QuadroSvg } from "../svg/quadro";
-import { test } from "../../pages/dashboard/test";
 import { MagicMotion } from "react-magic-motion";
 
 interface Project {
@@ -26,7 +25,7 @@ export const Sidebar: React.FC<Props> = ({ projects }) => {
     const numero = Math.floor(Math.random() * 1000);
     const newProject = { id: numero, name: `Project ${numero}` };
 
-    setAddProject(test.push(newProject));
+    setAddProject([...addProject, newProject]);
   };
 
   return (

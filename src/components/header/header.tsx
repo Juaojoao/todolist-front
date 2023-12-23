@@ -3,18 +3,15 @@ import { DateSvg } from "../svg/date";
 import { SearchSvg } from "../svg/src";
 import { QuadroSvg } from "../svg/quadro";
 import { MoreSvg } from "../svg/more";
-import { FunctionDate } from "../../util/functions/date";
+import { FunctionDate } from "../../util/functions/setDate";
+import { User } from "../../interfaces/todo-list.interface";
 
-interface User {
-  name: string;
-  image: string;
-}
-
-interface Props {
+interface UserProps {
+  addList?: () => void;
   user: User;
 }
 
-export const HeaderTodo: React.FC<Props> = ({ user }) => {
+export const HeaderTodo = ({ user, addList }: UserProps) => {
   return (
     <header className="w-full">
       <div className="header-wrapper flex w-full items-center justify-between py-10">
@@ -49,7 +46,10 @@ export const HeaderTodo: React.FC<Props> = ({ user }) => {
           <QuadroSvg />
           <p>Seu Quadro</p>
         </div>
-        <button className="header-addList flex items-center gap-2">
+        <button
+          onClick={addList}
+          className="header-addList flex items-center gap-2"
+        >
           <MoreSvg />
           <p className="font-semibold text-sm">Adicionar Lista</p>
         </button>

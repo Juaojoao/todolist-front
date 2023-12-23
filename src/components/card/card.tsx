@@ -1,26 +1,20 @@
 import React from "react";
 import { ProgressSvg } from "../svg/progress";
 import { Progress } from "@material-tailwind/react";
-
-export interface CardProps {
-  id?: number;
-  title?: string;
-  description?: string;
-  completedTasks?: number;
-  totalTasks?: number;
-  date?: string;
-}
+import { Card } from "../../interfaces/todo-list.interface";
 
 type Colors = "red" | "yellow" | "green";
 
-export const CardTodo: React.FC<CardProps> = ({
+export const CardTodo: React.FC<Card> = ({
   id,
-  title,
+  name,
   description,
   date,
-  completedTasks,
-  totalTasks,
+  tasks,
 }) => {
+  const completedTasks = tasks.filter((item) => item.status).length;
+  const totalTasks = tasks.length;
+
   if (completedTasks === undefined || totalTasks === undefined) return;
 
   const progressPercent = (completedTasks / totalTasks) * 100;
@@ -42,7 +36,7 @@ export const CardTodo: React.FC<CardProps> = ({
     >
       <div className="card-desc">
         <div className="card-desc-wrapper flex flex-col gap-1">
-          <h3 className="font-bold">{title}</h3>
+          <h3 className="font-bold">{name}</h3>
           <p className="font-medium text-xs opacity-50">{description}</p>
         </div>
       </div>
