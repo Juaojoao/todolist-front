@@ -1,17 +1,20 @@
-import { ButtonComponent } from "../../components/buttons/button";
-import { InputFormComponent } from "../../components/inputs/input-form";
-import { LockIcon } from "../../components/svg/lock";
-import { MailIcon } from "../../components/svg/mail";
+import { ButtonComponent } from '../../components/buttons/button';
+import { InputFormComponent } from '../../components/inputs/input-form';
+import { LockIcon } from '../../components/svg/lock';
+import { MailIcon } from '../../components/svg/mail';
 import {
   bodyFormStyle,
   cardStyle,
   formStyle,
   inputErrorStyle,
   inputSuceessStyle,
-} from "../register/sytles";
-import { useChangeInput } from "../../util/hooks/useChangeInput";
-import { useState } from "react";
-import { SpinSvg } from "../../components/svg/spin";
+} from '../register/sytles';
+import { useChangeInput } from '../../util/hooks/useChangeInput';
+import { useEffect, useState } from 'react';
+import { SpinSvg } from '../../components/svg/spin';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { validateLoginInputs } from '../../util/functions/validateLogin';
 
 interface FormState {
   email: string;
@@ -20,75 +23,52 @@ interface FormState {
 
 export const LoginPage = () => {
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
+  const { login, getAuhToken } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = getAuhToken();
+
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate, getAuhToken]);
 
   const initialFormState: FormState = {
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   };
 
-  const initialErrorState: FormState = {
-    email: "",
-    password: "",
-  };
-
-  const { input, handleInput, setInput } =
-    useChangeInput<FormState>(initialFormState);
+  const { input, handleInput } = useChangeInput<FormState>(initialFormState);
   const [isLoad, setIsLoad] = useState<boolean>(false);
   const [error, setError] =
     useState<Record<keyof FormState, string>>(initialFormState);
 
-  const validateInputs = () => {
-    const newErrors: Record<keyof FormState, string> = { ...initialErrorState };
-
-    let isValid = true;
-
-    if (input.email.trim() === "") {
-      newErrors.email = "Digite seu Email";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(input.email)) {
-      newErrors.email = "Digite um email válido";
-      isValid = false;
-    }
-
-    if (input.password.trim() === "") {
-      newErrors.password = "Digite sua senha";
-      isValid = false;
-    } else if (input.password.length < 6) {
-      newErrors.password = "Sua senha deve ter no mínimo 6 caracteres";
-      isValid = false;
-    }
-
-    if (Object.keys(newErrors).length === 0) {
-      setInput(initialFormState);
-    } else {
-      setError(newErrors);
-    }
-
-    return isValid;
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoad(true);
 
-    if (!validateInputs()) {
+    const { isValid, newErrors } = validateLoginInputs(input);
+
+    if (!isValid) {
+      setError(newErrors || initialFormState);
       setIsLoad(false);
       return;
     }
 
     try {
-      setTimeout(() => {
-        setIsSubmit(true);
-        setIsLoad(false);
-      }, 1000);
-    } catch (error) {
+      setIsLoad(true);
+      await login(input.email, input.password);
+      setIsSubmit(true);
+      setIsLoad(false);
+    } catch (error: any) {
       console.log(error);
       setIsLoad(false);
     }
   };
 
   const handleFieldError = (fieldName: keyof FormState) =>
-    error[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : "";
+    error[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : '';
 
   return (
     <div className={bodyFormStyle}>
@@ -97,25 +77,25 @@ export const LoginPage = () => {
           <InputFormComponent
             placeholder="Email"
             type="text"
-            icon={<MailIcon className={handleFieldError("email")} />}
-            onChange={handleInput("email")}
+            icon={<MailIcon className={handleFieldError('email')} />}
+            onChange={handleInput('email')}
             value={input.email}
-            className={handleFieldError("email")}
+            className={handleFieldError('email')}
           />
           <InputFormComponent
             placeholder="Password"
             type="password"
-            icon={<LockIcon className={handleFieldError("password")} />}
-            onChange={handleInput("password")}
+            icon={<LockIcon className={handleFieldError('password')} />}
+            onChange={handleInput('password')}
             value={input.password}
-            className={handleFieldError("password")}
+            className={handleFieldError('password')}
           />
 
           <div className="flex flex-col  w-full gap-3">
             <a href="/forgot-pass" className="italic text-sm">
               Forgot password?
             </a>
-            <ButtonComponent>{isLoad ? <SpinSvg /> : "Login"}</ButtonComponent>
+            <ButtonComponent>{isLoad ? <SpinSvg /> : 'Login'}</ButtonComponent>
           </div>
           <a href="/register" className="uppercase text-sm hover:underline">
             Criar Conta

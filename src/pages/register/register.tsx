@@ -12,95 +12,75 @@ import {
 } from "./sytles";
 import { SpinSvg } from "../../components/svg/spin";
 import { useChangeInput } from "../../util/hooks/useChangeInput";
+import { UserIcon } from "../../components/svg/user";
+import { initialRegisterError, validateRegisterInputs } from "../../util/functions/validateRegister";
+import { useUser } from "../../context/UserContext";
 
 interface FormState {
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
 export const RegisterPage = () => {
+
+  const { createUser } = useUser();
+
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
   const initialFormState: FormState = {
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   };
 
-  const initialErrorState: FormState = {
-    email: "",
-    password: "",
-    confirmPassword: "",
-  };
-
-  const { input, handleInput, setInput } =
+  const { input, handleInput } =
     useChangeInput<FormState>(initialFormState);
   const [isLoad, setIsLoad] = useState<boolean>(false);
   const [error, setError] =
-    useState<Record<keyof FormState, string>>(initialErrorState);
+    useState<Record<keyof FormState, string>>(initialRegisterError);
 
-  const validateInputs = () => {
-    const newErrors: Record<keyof FormState, string> = { ...initialErrorState };
-
-    let isValid = true;
-
-    if (input.email.trim() === "") {
-      newErrors.email = "Digite seu Email";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(input.email)) {
-      newErrors.email = "Digite um email válido";
-      isValid = false;
-    }
-
-    if (input.password.trim() === "") {
-      newErrors.password = "Digite sua senha";
-      isValid = false;
-    } else if (input.password.length < 6) {
-      newErrors.password = "Sua senha deve ter no mínimo 6 caracteres";
-      isValid = false;
-    }
-
-    if (input.confirmPassword.trim() === "") {
-      newErrors.confirmPassword = "Confirme sua senha";
-      isValid = false;
-    } else if (input.confirmPassword !== input.password) {
-      newErrors.confirmPassword = "As senhas não conferem";
-      isValid = false;
-    }
-
-    if (Object.keys(newErrors).length === 0) {
-      setInput(initialFormState);
-    } else {
-      setError(newErrors);
-    }
-
-    return isValid;
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoad(true);
-    if (!validateInputs()) {
+
+    const { isValid, newErrors } = validateRegisterInputs(input);
+
+    if (!isValid) {
+      setError(newErrors || initialRegisterError);
       setIsLoad(false);
       return;
     }
 
     try {
-      setTimeout(() => {
-        setIsSubmit(true);
-        setIsLoad(false);
-      }, 500);
+      await createUser(input.name, input.email, input.password);
+      setIsSubmit(true);
+      setIsLoad(false);
     } catch (error) {
       console.log(error);
       setIsLoad(false);
     }
   };
+
   const handleFieldError = (fieldName: keyof FormState) =>
     error[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : "";
+
   return (
     <div className={bodyFormStyle}>
       <div className={`${cardStyle}`}>
         <form action="" className={formStyle} onSubmit={handleSubmit}>
+
+          <InputFormComponent
+            name="name"
+            placeholder="Nome"
+            type="text"
+            onChange={handleInput("name")}
+            value={input.name}
+            className={handleFieldError("name")}
+            icon={<UserIcon className={handleFieldError("name")} />}
+          />
+
           <InputFormComponent
             name="email"
             placeholder="Email"
@@ -116,6 +96,7 @@ export const RegisterPage = () => {
             type="password"
             icon={<LockIcon className={handleFieldError("password")} />}
             name="password"
+            tooltip="Deve conter: Carateres especiais, letras maiúsculas e minúsculas e números."
             value={input.password}
             onChange={handleInput("password")}
             className={handleFieldError("password")}
