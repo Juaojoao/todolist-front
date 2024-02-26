@@ -11,7 +11,7 @@ interface User {
 interface Quadro {
   id: number;
   name: string;
-  lists?: List[];
+  activitiesList?: List[];
   owner?: number;
 }
 
@@ -19,23 +19,23 @@ interface List {
   id: number;
   name: string;
   cards?: Card[];
-  quadroId?: number;
+  frameId?: number;
 }
 
 interface Card {
   id: number;
   name: string;
   description?: string;
-  date: string;
-  tasks?: Task[];
-  list?: number;
+  createdAt: string;
+  tasklist?: Task[];
+  activitiesListId?: number;
 }
 
 interface Task {
   id: number;
-  description: string;
+  name: string;
   status: boolean;
-  card?: number;
+  cardId?: number;
 }
 
 interface TasksContainer {

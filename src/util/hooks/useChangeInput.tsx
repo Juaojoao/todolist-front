@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-export const useChangeInput = <T,>(initialState: any) => {
+export const useChangeInput = <T extends Record<string, any>>(
+  initialState: T,
+) => {
   const [input, setInput] = useState<T>(initialState);
 
   const handleInput =
-    (field: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    <K extends keyof T>(field: K) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setInput({ ...input, [field]: e.target.value });
     };
 
