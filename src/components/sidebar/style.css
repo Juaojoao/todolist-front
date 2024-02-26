@@ -1,6 +1,4 @@
 .sidebar-close {
-  width: 0;
-  transition: 0.5s;
   overflow: hidden;
   height: 100%;
   background-color: #222327;
@@ -9,7 +7,6 @@
 .sidebar-open {
   width: 250px;
   height: 100%;
-  transition: 0.5s;
   background-color: #222327;
 }
 

@@ -18,7 +18,7 @@ export const LockIcon: React.FC<LockIconProps> = ({
   return (
     <FontAwesomeIcon
       icon={icon}
-      className={`${iconClassName}${className}`}
+      className={`${iconClassName}`}
       {...rest}
     />
   );

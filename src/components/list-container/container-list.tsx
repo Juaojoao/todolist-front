@@ -1,47 +1,116 @@
-import { useState } from "react";
-import { Card, List } from "../../interfaces/todo-list.interface";
-import { addCardToProject } from "../../util/functions/addCardToProject";
-import { CardTodo } from "../card/card";
-import { MoreSvg } from "../svg/more";
+import { useState } from 'react';
+import { Card, List } from '../../interfaces/todo-list.interface';
+import { MoreSvg } from '../svg/more';
+import { QuadroSvg } from '../svg/quadro';
+import { ButtonGreen } from '../buttons/buttonGreen';
+import { ButtonRed } from '../buttons/buttonRed';
+import { useChangeInput } from '../../util/hooks/useChangeInput';
+import { useList } from '../../context/ListContext';
+import { ContainerCard } from './container-card';
 
-export const ContainerList = ({ list }: { list: List[] }) => {
-  const [addCard, setAddCard] = useState<Card[][]>([]);
-  const handleAddList = (listIndex: number) => {
-    addCardToProject({ list, listIndex, setAddCard });
+type ContainerListProps = {
+  list: List[] | null;
+  card: Card[] | null;
+  frameId?: number;
+  updateListData?: (data: List[]) => void;
+};
+
+export const ContainerList = ({
+  list,
+  card,
+  frameId,
+  updateListData,
+}: ContainerListProps) => {
+  const { input, handleInput } = useChangeInput({ name: '' });
+  const [addInput, setAddInput] = useState(false);
+
+  const { createList, getLists } = useList();
+
+  const handleAddButton = () => {
+    setAddInput(!addInput);
+  };
+
+  const handleAddList = async () => {
+    if (frameId !== undefined) {
+      await createList(input.name, frameId);
+      input.name = '';
+      setAddInput(false);
+
+      if (updateListData) {
+        const lists = await getLists();
+        updateListData(lists || []);
+      }
+    }
   };
 
   return (
-    <div className="flex gap-6">
-      {!list.length ? (
-        <p>Está um pouco vazio aqui..</p>
-      ) : (
-        list.map((item, index) => (
-          <div key={item.id} className="card-wrapper">
-            <div className="w-80 list-todo bg-BlackTheme-list p-3 flex flex-col gap-8 rounded-xl">
-              <div className="list-top flex justify-between items-center px-3">
-                <p className="text-sm font-semibold opacity-50">{item.name}</p>
-                <button
-                  onClick={() => handleAddList(index)}
-                  className="flex gap-2 items-center font-bold text-sm"
-                >
-                  <MoreSvg /> Novo Cartão
-                </button>
-              </div>
-              <div className="list-wrapper overflow-y-auto">
-                <div className="flex flex-col gap-3 items-center px-2">
-                  {item.cards && (
-                    <>
-                      {item.cards.map((card: Card) => (
-                        <CardTodo key={card.id} {...card} />
-                      ))}
-                    </>
-                  )}
-                </div>
-              </div>
+    <div className="container-list flex gap-6 flex-col">
+      <div className="pb-2 flex gap-3">
+        <div className="header-quadro flex items-center gap-2">
+          <QuadroSvg />
+          <p>Seu Quadro</p>
+        </div>
+
+        {!addInput && (
+          <button
+            onClick={handleAddButton}
+            className="header-addList flex items-center gap-2 "
+          >
+            <MoreSvg />
+            <p className="font-semibold text-sm">Adicionar Lista</p>
+          </button>
+        )}
+        {addInput && (
+          <div className="flex justify-center items-center gap-2">
+            <input
+              value={input.name}
+              onChange={handleInput('name')}
+              type="text"
+              name="name"
+              id="name"
+              placeholder="Nova Lista"
+              className="overflow-hidden
+               resize-none text-sm rounded-lg outline-none p-2 
+               bg-BlackTheme-list drop-shadow-lg text-gray-400
+               border border-gray-400 w-full"
+            />
+            <div className="flex w-full gap-2">
+              <ButtonGreen
+                children="Criar"
+                buttonProps={{
+                  onClick: handleAddList,
+                }}
+              />
+              <ButtonRed
+                children="X"
+                buttonProps={{
+                  onClick: () => setAddInput(false),
+                }}
+              />
             </div>
           </div>
-        ))
-      )}
+        )}
+      </div>
+      <div className="divisor w-full h-px bg-white" />
+      <div className="flex gap-4 mt-5 w-full overflow-x-auto">
+        {list?.length ? (
+          list.map(
+            (item: List) =>
+              item.frameId === frameId && (
+                <ContainerCard
+                  title={item.name}
+                  key={item.id}
+                  cards={
+                    card?.filter((card) => card.activitiesListId === item.id) ||
+                    []
+                  }
+                />
+              ),
+          )
+        ) : (
+          <p>Está um pouco vazio aqui...</p>
+        )}
+      </div>
     </div>
   );
 };

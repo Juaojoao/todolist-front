@@ -1,19 +1,21 @@
-import React from "react";
 import { ProgressSvg } from "../svg/progress";
 import { Progress } from "@material-tailwind/react";
 import { Card } from "../../interfaces/todo-list.interface";
 
 type Colors = "red" | "yellow" | "green";
 
-export const CardTodo: React.FC<Card> = ({
-  id,
-  name,
-  description,
-  date,
-  tasks,
-}) => {
-  const completedTasks = tasks.filter((item) => item.status).length;
-  const totalTasks = tasks.length;
+type CardTodoProps = {
+  card: Card;
+}
+
+const formatDate = (date: string) => {
+  const newDate = new Date(date);
+  return newDate.toLocaleDateString();
+}
+
+export const CardTodo = ({ card }: CardTodoProps) => {
+  const completedTasks = card.tasklist?.filter((item) => item.status).length;
+  const totalTasks = card.tasklist?.length;
 
   if (completedTasks === undefined || totalTasks === undefined) return;
 
@@ -31,13 +33,13 @@ export const CardTodo: React.FC<Card> = ({
 
   return (
     <div
-      key={id}
+      key={card.id}
       className="card-todo cursor-pointer w-full h-44 bg-BlackTheme-card p-5 rounded-xl drop-shadow-lg"
     >
       <div className="card-desc">
         <div className="card-desc-wrapper flex flex-col gap-1">
-          <h3 className="font-bold">{name}</h3>
-          <p className="font-medium text-xs opacity-50">{description}</p>
+          <h3 className="font-bold">{card.name}</h3>
+          <p className="font-medium text-xs opacity-50">{card.description}</p>
         </div>
       </div>
       <div className="task-progress flex flex-col gap-1">
@@ -60,7 +62,7 @@ export const CardTodo: React.FC<Card> = ({
       </div>
       <div className="task-footer pt-5 flex">
         <div className="task-date font-semibold text-sm bg-BlackTheme-roudend rounded-xl p-1">
-          {date}
+          {formatDate(card.createdAt)}
         </div>
         <div className="task-users"></div>
       </div>

@@ -18,7 +18,7 @@ export const UserIcon: React.FC<UserIconProps> = ({
   return (
     <FontAwesomeIcon
       icon={icon}
-      className={`${iconClassName}${className} w-full text-7xl`}
+      className={`${iconClassName}${className}`}
       {...rest}
     />
   );

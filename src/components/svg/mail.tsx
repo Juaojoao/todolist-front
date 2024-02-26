@@ -18,7 +18,7 @@ export const MailIcon: React.FC<MailIconProps> = ({
   return (
     <FontAwesomeIcon
       icon={icon}
-      className={`${iconClassName}${className}`}
+      className={`${iconClassName}`}
       {...rest}
     />
   );
