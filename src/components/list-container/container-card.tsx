@@ -4,58 +4,98 @@ import { ButtonRed } from '../buttons/buttonRed';
 import { CardTodo } from '../card/card';
 import { MoreSvg } from '../svg/more';
 import { Card } from '../../interfaces/todo-list.interface';
+import { useCard } from '../../context/CardContext';
+import { useChangeInput } from '../../util/hooks/useChangeInput';
+import { DropDownButton } from '../buttons/dropDown';
+
+type ContainerCardProps = {
+  title: string;
+  cards: Card[];
+  ActivityListId?: number;
+  updateCardData?: () => void;
+};
 
 export const ContainerCard = ({
   title,
   cards,
-}: {
-  title: string;
-  cards: Card[];
-}) => {
+  ActivityListId,
+  updateCardData,
+}: ContainerCardProps) => {
+  const { input, handleInput } = useChangeInput({ name: '' });
   const [addInput, setAddInput] = useState(false);
+  const { createCard } = useCard();
 
-  const handleAddCard = () => {
+  const handleAddInput = () => {
     setAddInput(!addInput);
   };
 
+  const handleAddCard = async () => {
+    if (ActivityListId !== undefined) {
+      await createCard(input.name, ActivityListId);
+      input.name = '';
+      setAddInput(false);
+
+      if (updateCardData) {
+        updateCardData();
+      }
+    }
+  };
+
   return (
-    <div className="w-72 list-todo bg-BlackTheme-list mb-2 p-3 flex flex-col gap-8 rounded-xl flex-shrink-0">
+    <div className="w-72 h-max drop-shadow-lg list-todo bg-BlackTheme-list mb-2 p-3 flex flex-col gap-3 rounded-xl flex-shrink-0">
       <div className="list-top flex justify-between items-center px-3">
         <p className="text-sm font-semibold opacity-50">{title}</p>
-        <p>...</p>
+        <DropDownButton textName="...">
+          <ul
+            className="text-sm flex flex-col gap-2"
+            aria-labelledby="dropdownDefaultButton"
+          >
+            <li className="cursor-pointer button-hover p-2">Editar</li>
+            <li className="cursor-pointer button-hover p-2">Excluir</li>
+          </ul>
+        </DropDownButton>
       </div>
 
-      <div className="flex flex-col gap-3 items-center px-2">
-        {cards?.length > 0 &&
-          cards.map((card) => <CardTodo card={card} key={card.id} />)}
-
-        {addInput && (
-          <div className="w-full flex flex-col">
-            <textarea
-              name="name"
-              id="name"
-              placeholder="Digite o nome do cartão"
-              className="overflow-hidden resize-none text-sm drop-shadow-2xl py-6 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
-            />
-            <div className="flex gap-2 mt-3">
-              <ButtonGreen children="Adicionar cartão" />
-              <ButtonRed
-                children="X"
-                buttonProps={{
-                  onClick: () => setAddInput(false),
-                }}
-              />
-            </div>
-          </div>
+      <div className="flex flex-col gap-3 items-center overflow-y-auto drop-shadow-xl">
+        {cards?.length > 0 ? (
+          cards.map((card) => <CardTodo card={card} key={card.id} />)
+        ) : (
+          <span className="text-sm text-gray-400">Sem cartões..</span>
         )}
       </div>
       {!addInput && (
-        <button
-          onClick={handleAddCard}
-          className="rounded-lg p-2 flex gap-2 items-center font-bold text-sm hover:bg-gray-800"
-        >
-          <MoreSvg /> Adicionar um cartão
-        </button>
+        <div className="w-full flex flex-col">
+          <button
+            onClick={handleAddInput}
+            className="rounded-lg flex gap-2 items-center font-bold text-sm hover:bg-gray-800"
+          >
+            <MoreSvg /> Adicionar um cartão
+          </button>
+        </div>
+      )}
+      {addInput && (
+        <div className="w-full flex flex-col">
+          <input
+            type="text"
+            name="name"
+            id="name"
+            onChange={handleInput('name')}
+            placeholder="Digite o nome do cartão"
+            className="overflow-hidden resize-none text-sm drop-shadow-2xl py-6 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
+          />
+          <div className="flex gap-2 mt-3">
+            <ButtonGreen
+              children="Criar cartão"
+              buttonProps={{ onClick: handleAddCard }}
+            />
+            <ButtonRed
+              children="X"
+              buttonProps={{
+                onClick: () => setAddInput(false),
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

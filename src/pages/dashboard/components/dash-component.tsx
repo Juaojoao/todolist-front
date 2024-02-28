@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../../context/UserContext';
 import { useCard } from '../../../context/CardContext';
 import { useFrame } from '../../../context/FrameContext';
+import { useList } from '../../../context/ListContext';
 
 export const ListTodo = () => {
   const [frameData, setFrameData] = useState<Quadro[] | null>(null);
@@ -24,7 +25,9 @@ export const ListTodo = () => {
   const { createFrame } = useFrame();
   const { getInfoUser } = useUser();
   const { getFrames } = useFrame();
+  const { getLists } = useList();
   const { getCards } = useCard();
+
   const { token } = useAuth();
 
   const navigate = useNavigate();
@@ -54,7 +57,7 @@ export const ListTodo = () => {
     } else {
       navigate('/');
     }
-  }, [token, navigate, getInfoUser, getFrames, getCards]);
+  }, [token, getInfoUser, getFrames, getCards]);
 
   const handleSelectFrame = (projectId: number) => {
     const selectedFrame = frameData?.find((frame) => frame.id === projectId);
@@ -63,14 +66,20 @@ export const ListTodo = () => {
     setListData(lists);
   };
 
-  const handleAddProject = async (id: number, name: string) => {
+  const addFrame = async (id: number, name: string) => {
     await createFrame(id, name);
     const frames = await getFrames();
     setFrameData(frames);
   };
 
-  const updateListData = (updateListData: List[]) => {
-    setListData(updateListData);
+  const updateListData = async () => {
+    const lists = await getLists();
+    setListData(lists);
+  };
+
+  const updateCardData = async () => {
+    const cards = await getCards();
+    setCardData(cards);
   };
 
   return (
@@ -78,11 +87,11 @@ export const ListTodo = () => {
       <Sidebar
         projects={frameData}
         handleSelectProject={handleSelectFrame}
-        handleAddProject={handleAddProject}
+        handleAddProject={addFrame}
         selectedProject={selectedFrame}
         userId={userData?.id}
       />
-      <div className="project-box px-8 h-full w-full flex flex-col overflow-x-hidden">
+      <div className="project-box px-8 w-full flex flex-col overflow-x-hidden">
         <HeaderTodo user={userData} />
 
         <div className="overflow-hidden">
@@ -91,6 +100,7 @@ export const ListTodo = () => {
             card={cardData}
             frameId={selectedFrame}
             updateListData={updateListData}
+            updateCardData={updateCardData}
           />
         </div>
       </div>

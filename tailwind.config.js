@@ -8,6 +8,9 @@ module.exports = withMT({
       borderRadius: {
         "3/6": "50%",
       },
+      height: {
+        "1/10": "10%",
+      },
       colors: {
         primary: {
           grayPrimary: "#b3b3b3",

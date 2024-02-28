@@ -1,4 +1,4 @@
-import { ListTodo } from "./components/dash-component";
+import { ListTodo } from './components/dash-component';
 
 export const Dashboard = () => {
   return (

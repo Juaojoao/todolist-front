@@ -8,6 +8,7 @@ import { animated, useTransition } from 'react-spring';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { ButtonRed } from '../buttons/buttonRed';
 import { ButtonGreen } from '../buttons/buttonGreen';
+import { DropDownButton } from '../buttons/dropDown';
 
 type Project = {
   id: number;
@@ -29,11 +30,11 @@ export const Sidebar = ({
   projects,
   userId,
 }: SidebarProps) => {
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [addInput, setAddInput] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { input, handleInput } = useChangeInput({ name: '' });
-
   const { logout } = useAuth();
 
   const transitions = useTransition(open, {
@@ -52,6 +53,10 @@ export const Sidebar = ({
     setOpen(!open);
   };
 
+  const handleAddInput = (projectId: number) => {
+    setEditingProjectId(projectId);
+  };
+
   const handleAddButton = () => {
     setAddInput(!addInput);
   };
@@ -65,7 +70,7 @@ export const Sidebar = ({
   };
 
   return (
-    <div className="sidebar flex h-full relative">
+    <div className="sidebar flex relative">
       <aside className="bg-BlackTheme-aside px-6 pt-6 z-20">
         <div className="flex center justify-center flex-col gap-2">
           <button
@@ -84,7 +89,7 @@ export const Sidebar = ({
           item && (
             <animated.div
               style={style}
-              className={`z-10 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
+              className={`z-20 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
             >
               <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
                 <h1>Quadros</h1>
@@ -100,12 +105,12 @@ export const Sidebar = ({
                     item && (
                       <animated.div
                         style={styleButton}
-                        className="flex gap-3 items-center flex-col p-3 bg-BlackTheme-aside m-3 rounded-xl "
+                        className="flex gap-3 items-center flex-col p-3  m-3 rounded-xl "
                       >
                         <input
                           type="text"
                           placeholder="Criar novo Quadro"
-                          className="input-box w-full bg-transparent border-b border-gray-50 outline-none text-gray-50"
+                          className="input-box w-full bg-transparent border p-2 rounded-lg border-gray-600 focus:border-gray-50 outline-none text-gray-50"
                           value={input.name}
                           onChange={handleInput('name')}
                           name="name"
@@ -138,8 +143,53 @@ export const Sidebar = ({
                       handleSelectProject(Number(project?.id))
                     }
                   >
-                    <div className="color-box w-6 h-4 rounded-md bg-slate-500"></div>
-                    <p>{project.name}</p>
+                    <div className="flex items-center justify-between w-full px-2">
+                      {editingProjectId === project.id ? (
+                        <div className="flex justify-center items-center gap-2 w-full">
+                          <input
+                            value={input.name}
+                            placeholder={project.name}
+                            onChange={handleInput('name')}
+                            type="text"
+                            name="name"
+                            id="name"
+                            className="overflow-hidden
+                             resize-none text-sm rounded-lg outline-none p-2 
+                           bg-BlackTheme-list drop-shadow-lg text-gray-400
+                             border border-gray-400 w-full"
+                          />
+                          <div className="flex gap-2">
+                            <ButtonGreen children="V" />
+                            <ButtonRed
+                              children="X"
+                              buttonProps={{
+                                onClick: () => setEditingProjectId(null),
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <p>{project.name}</p>
+                      )}
+                      {!editingProjectId && (
+                        <DropDownButton textName="...">
+                          <ul
+                            className="text-sm flex flex-col gap-2"
+                            aria-labelledby="dropdownDefaultButton"
+                          >
+                            <li
+                              onClick={() => handleAddInput(project.id)}
+                              className="cursor-pointer button-hover p-2"
+                            >
+                              Editar
+                            </li>
+                            <li className="cursor-pointer button-hover p-2">
+                              Excluir
+                            </li>
+                          </ul>
+                        </DropDownButton>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>

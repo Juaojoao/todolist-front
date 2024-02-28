@@ -8,6 +8,7 @@ import { connectionAPI } from '../services/api/api';
 
 type CardContextType = {
   getCards: () => Promise<Card[] | null>;
+  createCard: (name: string, activitiesListId: number) => Promise<Card | null>;
 };
 
 type CardProviderProps = {
@@ -30,8 +31,26 @@ export const CardProvider = ({ children }: CardProviderProps) => {
     }
   };
 
+  const createCard = async (name: string, activitiesListId: number) => {
+    const token = getTokenFromLocalStorage();
+    if (!token) null;
+    try {
+      getAuthorizationToken(token);
+      const response = await connectionAPI.post('/card/create', {
+        name,
+        activitiesListId,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating Card', error);
+      return null;
+    }
+  };
+
   return (
-    <CardContext.Provider value={{ getCards }}>{children}</CardContext.Provider>
+    <CardContext.Provider value={{ getCards, createCard }}>
+      {children}
+    </CardContext.Provider>
   );
 };
 

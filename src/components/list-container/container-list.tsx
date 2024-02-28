@@ -12,7 +12,8 @@ type ContainerListProps = {
   list: List[] | null;
   card: Card[] | null;
   frameId?: number;
-  updateListData?: (data: List[]) => void;
+  updateListData?: () => void;
+  updateCardData?: () => void;
 };
 
 export const ContainerList = ({
@@ -20,11 +21,12 @@ export const ContainerList = ({
   card,
   frameId,
   updateListData,
+  updateCardData,
 }: ContainerListProps) => {
   const { input, handleInput } = useChangeInput({ name: '' });
   const [addInput, setAddInput] = useState(false);
 
-  const { createList, getLists } = useList();
+  const { createList } = useList();
 
   const handleAddButton = () => {
     setAddInput(!addInput);
@@ -37,8 +39,7 @@ export const ContainerList = ({
       setAddInput(false);
 
       if (updateListData) {
-        const lists = await getLists();
-        updateListData(lists || []);
+        updateListData();
       }
     }
   };
@@ -92,7 +93,7 @@ export const ContainerList = ({
         )}
       </div>
       <div className="divisor w-full h-px bg-white" />
-      <div className="flex gap-4 mt-5 w-full overflow-x-auto">
+      <div className="flex gap-4 w-full overflow-x-auto overflow-y-hidden">
         {list?.length ? (
           list.map(
             (item: List) =>
@@ -104,6 +105,8 @@ export const ContainerList = ({
                     card?.filter((card) => card.activitiesListId === item.id) ||
                     []
                   }
+                  ActivityListId={item.id}
+                  updateCardData={updateCardData}
                 />
               ),
           )
