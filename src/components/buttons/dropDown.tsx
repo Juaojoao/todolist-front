@@ -3,9 +3,14 @@ import { useState } from 'react';
 type DropDownButtonProps = {
   textName: string;
   children?: React.ReactNode;
+  props?: React.HTMLProps<HTMLDivElement>;
 };
 
-export const DropDownButton = ({ textName, children }: DropDownButtonProps) => {
+export const DropDownButton = ({
+  textName,
+  children,
+  props,
+}: DropDownButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropDown = () => {
@@ -13,13 +18,13 @@ export const DropDownButton = ({ textName, children }: DropDownButtonProps) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" {...props}>
       <div
         id="dropdownDefaultButton"
         onClick={toggleDropDown}
         className="text-gray-500 bg-transparent hover:bg-BlackTheme-card hover:drop-shadow-lg
-         button-hover outline-none font-medium 
-         rounded-lg text-lg px-5 py-2.5 text-center inline-flex items-center cursor-pointer tracking-widest"
+         button-hover outline-none font-medium flex justify-center items-center
+         rounded-lg text-lg py-1 px-2 text-center cursor-pointer tracking-widest"
       >
         {textName}
       </div>

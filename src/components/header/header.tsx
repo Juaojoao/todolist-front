@@ -11,7 +11,7 @@ interface UserProps {
 export const HeaderTodo = ({ user }: UserProps) => {
   return (
     <header className="w-full">
-      <div className="header-wrapper flex w-full items-center justify-between py-10">
+      <div className="header-wrapper flex w-full items-center justify-between py-8">
         <div className="header-desc">
           <h1 className="text-xl font-bold text-white">{`Bem-Vindo, ${user?.name}`}</h1>
         </div>

@@ -9,6 +9,11 @@ import {
 export type FrameContextType = {
   getFrames: () => Promise<Quadro[] | null>;
   createFrame: (userId: number, name: string) => Promise<Quadro | null>;
+  deleteFrame: (id: number, userId: number) => Promise<void>;
+  updateFrame: (
+    frameId: number,
+    data: { userId: number; name: string },
+  ) => Promise<Quadro | null>;
 };
 
 type FrameProviderProps = {
@@ -25,6 +30,7 @@ const FrameProvider = ({ children }: FrameProviderProps) => {
     try {
       getAuthorizationToken(token);
       const response = await connectionAPI.get<Quadro[]>('/frame');
+
       return response.data;
     } catch (error) {
       console.error('Error getting Frame', error);
@@ -50,8 +56,43 @@ const FrameProvider = ({ children }: FrameProviderProps) => {
     }
   };
 
+  const updateFrame = async (
+    frameId: number,
+    data: { userId: number; name: string },
+  ) => {
+    const token = getTokenFromLocalStorage();
+    if (!token) return null;
+
+    try {
+      getAuthorizationToken(token);
+      const response = await connectionAPI.patch<Quadro>(`/frame/${frameId}`, {
+        userId: data.userId,
+        name: data.name,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error updating Frame', error);
+      return null;
+    }
+  };
+
+  const deleteFrame = async (id: number, userId: number) => {
+    const token = getTokenFromLocalStorage();
+    if (!token) return;
+
+    try {
+      getAuthorizationToken(token);
+      await connectionAPI.delete(`/frame/delete/${id}/${userId}`);
+    } catch (error) {
+      console.error('Error deleting Frame', error);
+    }
+  };
+
   return (
-    <FrameContext.Provider value={{ getFrames, createFrame }}>
+    <FrameContext.Provider
+      value={{ getFrames, createFrame, updateFrame, deleteFrame }}
+    >
       {children}
     </FrameContext.Provider>
   );

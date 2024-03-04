@@ -6,8 +6,8 @@ import { connectionAPI } from '../services/api/api';
 export type ListContextType = {
   getLists: () => Promise<List[] | null>;
   createList: (name: string, frameId: number) => Promise<void>;
-  // deleteList: (id: number) => Promise<void>;
   // updateList: (id: number, name: string) => Promise<void>;
+  // deleteList: (id: number) => Promise<void>;
 };
 
 type ListProviderProps = {

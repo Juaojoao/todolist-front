@@ -24,7 +24,7 @@ export const ListTodo = () => {
 
   const { createFrame } = useFrame();
   const { getInfoUser } = useUser();
-  const { getFrames } = useFrame();
+  const { getFrames, updateFrame, deleteFrame } = useFrame();
   const { getLists } = useList();
   const { getCards } = useCard();
 
@@ -66,8 +66,23 @@ export const ListTodo = () => {
     setListData(lists);
   };
 
+  // Frame
   const addFrame = async (id: number, name: string) => {
     await createFrame(id, name);
+    const frames = await getFrames();
+    setFrameData(frames);
+  };
+
+  const updFrame = async (frameId: number, name: string) => {
+    if (!userData || !frameId) return;
+    await updateFrame(frameId, { userId: userData.id, name });
+    const frames = await getFrames();
+    setFrameData(frames);
+  };
+
+  const deleteFrameId = async (frameId: number) => {
+    if (!userData || !frameId) return;
+    await deleteFrame(frameId, userData.id);
     const frames = await getFrames();
     setFrameData(frames);
   };
@@ -87,11 +102,13 @@ export const ListTodo = () => {
       <Sidebar
         projects={frameData}
         handleSelectProject={handleSelectFrame}
+        handleUpdateProject={updFrame}
+        handleDeleteProject={deleteFrameId}
         handleAddProject={addFrame}
         selectedProject={selectedFrame}
         userId={userData?.id}
       />
-      <div className="project-box px-8 w-full flex flex-col overflow-x-hidden">
+      <div className="project-box p-4 w-full flex flex-col overflow-x-hidden">
         <HeaderTodo user={userData} />
 
         <div className="overflow-hidden">

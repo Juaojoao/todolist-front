@@ -1,5 +1,5 @@
 import './style.css';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { MoreSvg } from '../svg/more';
 import { QuadroSvg } from '../svg/quadro';
 import { ExitIcon } from '../svg/exit';
@@ -9,6 +9,9 @@ import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { ButtonRed } from '../buttons/buttonRed';
 import { ButtonGreen } from '../buttons/buttonGreen';
 import { DropDownButton } from '../buttons/dropDown';
+import { useClickOutside } from '../../util/hooks/useClickOutside';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
+import { ModalComponent } from '../modal/modal';
 
 type Project = {
   id: number;
@@ -17,7 +20,9 @@ type Project = {
 
 type SidebarProps = {
   handleAddProject?: (id: number, name: string) => void;
+  handleUpdateProject?: (id: number, name: string) => void;
   handleSelectProject?: (frameId: number) => void;
+  handleDeleteProject?: (frameId: number) => void;
   projects: Project[] | null;
   selectedProject?: number | null;
   userId?: number;
@@ -25,6 +30,8 @@ type SidebarProps = {
 
 export const Sidebar = ({
   handleSelectProject,
+  handleUpdateProject,
+  handleDeleteProject,
   handleAddProject,
   selectedProject,
   projects,
@@ -36,6 +43,7 @@ export const Sidebar = ({
 
   const { input, handleInput } = useChangeInput({ name: '' });
   const { logout } = useAuth();
+  const sidebarRef = useRef(null);
 
   const transitions = useTransition(open, {
     from: { opacity: 0, transform: 'translateX(-100%)' },
@@ -48,6 +56,13 @@ export const Sidebar = ({
     enter: { opacity: 1, transform: 'translateY(0px)' },
     leave: { opacity: 0, transform: 'translateY(-20px)' },
   });
+
+  const closeAll = () => {
+    setOpen(false);
+    setAddInput(false);
+  };
+
+  useClickOutside({ ref: sidebarRef, callback: closeAll });
 
   const handleClick = () => {
     setOpen(!open);
@@ -62,11 +77,32 @@ export const Sidebar = ({
   };
 
   const handleAddProjectAndClearInput = () => {
+    if (input.name === '') return;
     if (!handleAddProject || !userId) return;
 
     handleAddProject(userId, input.name);
     input.name = '';
     setAddInput(false);
+  };
+
+  const handleUpdateFrame = (frameId: number) => {
+    if (input.name === '') return;
+    if (!handleUpdateProject || !frameId) return;
+
+    handleUpdateProject(frameId, input.name);
+    input.name = '';
+    setEditingProjectId(null);
+  };
+
+  const handleDeleteFrame = (frameId: number) => {
+    if (!handleDeleteProject || !frameId) return;
+    handleDeleteProject(frameId);
+  };
+
+  const funcSelectProject = (frameId: number) => {
+    if (!handleSelectProject) return;
+    handleSelectProject(frameId);
+    setOpen(false);
   };
 
   return (
@@ -88,6 +124,7 @@ export const Sidebar = ({
         (style, item) =>
           item && (
             <animated.div
+              ref={sidebarRef}
               style={style}
               className={`z-20 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
             >
@@ -133,19 +170,19 @@ export const Sidebar = ({
                     ),
                 )}
                 {projects?.map((project, index) => (
-                  <button
+                  <a
                     key={index}
                     className={`button-hover cursor-pointer p-3 flex gap-3 items-center w-full ${
                       selectedProject === project.id ? 'bg-gray-800' : ''
                     }`}
-                    onClick={() =>
-                      handleSelectProject &&
-                      handleSelectProject(Number(project?.id))
-                    }
+                    onClick={() => funcSelectProject(project.id)}
                   >
                     <div className="flex items-center justify-between w-full px-2">
                       {editingProjectId === project.id ? (
-                        <div className="flex justify-center items-center gap-2 w-full">
+                        <div
+                          className="flex justify-center items-center gap-2 w-full"
+                          onClick={useStopPropagation().stopPropagation}
+                        >
                           <input
                             value={input.name}
                             placeholder={project.name}
@@ -159,7 +196,12 @@ export const Sidebar = ({
                              border border-gray-400 w-full"
                           />
                           <div className="flex gap-2">
-                            <ButtonGreen children="V" />
+                            <ButtonGreen
+                              children="V"
+                              buttonProps={{
+                                onClick: () => handleUpdateFrame(project.id),
+                              }}
+                            />
                             <ButtonRed
                               children="X"
                               buttonProps={{
@@ -172,25 +214,35 @@ export const Sidebar = ({
                         <p>{project.name}</p>
                       )}
                       {!editingProjectId && (
-                        <DropDownButton textName="...">
+                        <DropDownButton
+                          props={{
+                            onClick: useStopPropagation().stopPropagation,
+                          }}
+                          textName="..."
+                        >
                           <ul
                             className="text-sm flex flex-col gap-2"
                             aria-labelledby="dropdownDefaultButton"
                           >
                             <li
                               onClick={() => handleAddInput(project.id)}
-                              className="cursor-pointer button-hover p-2"
+                              className="cursor-pointer button-hover p-2 text-center"
                             >
                               Editar
                             </li>
                             <li className="cursor-pointer button-hover p-2">
-                              Excluir
+                              <ModalComponent
+                                title="Excluir"
+                                funcConfirm={() =>
+                                  handleDeleteFrame(project.id)
+                                }
+                              />
                             </li>
                           </ul>
                         </DropDownButton>
                       )}
                     </div>
-                  </button>
+                  </a>
                 ))}
               </div>
             </animated.div>
