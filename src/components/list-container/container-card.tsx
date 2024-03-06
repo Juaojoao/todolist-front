@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
 import { CardTodo } from '../card/card';
@@ -7,12 +7,17 @@ import { Card } from '../../interfaces/todo-list.interface';
 import { useCard } from '../../context/CardContext';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
+import { useClickOutside } from '../../util/hooks/useClickOutside';
+import { ModalComponent } from '../modal/modal';
 
 type ContainerCardProps = {
   title: string;
   cards: Card[];
   ActivityListId?: number;
   updateCardData?: () => void;
+  updateList?: (listId: number, frameId: number, name: string) => void;
+  deleteList?: (listId: number, frameId: number) => void;
+  frameId?: number;
 };
 
 export const ContainerCard = ({
@@ -20,13 +25,24 @@ export const ContainerCard = ({
   cards,
   ActivityListId,
   updateCardData,
+  updateList,
+  frameId,
+  deleteList,
 }: ContainerCardProps) => {
-  const { input, handleInput } = useChangeInput({ name: '' });
+  const { input, handleInput } = useChangeInput({ name: '', updateName: '' });
+  const [addInputEdit, setAddInputEdit] = useState(false);
   const [addInput, setAddInput] = useState(false);
   const { createCard } = useCard();
+  const refOutSide = useRef(null);
+
+  useClickOutside({ ref: refOutSide, callback: () => setAddInput(false) });
 
   const handleAddInput = () => {
     setAddInput(!addInput);
+  };
+
+  const handleaddInputEdit = () => {
+    setAddInputEdit(!addInputEdit);
   };
 
   const handleAddCard = async () => {
@@ -43,6 +59,20 @@ export const ContainerCard = ({
     }
   };
 
+  const handleEditList = () => {
+    if (!ActivityListId || input.updateName === '' || !frameId || !updateList)
+      return;
+    updateList(ActivityListId, frameId, input.updateName);
+    input.updateName = '';
+    setAddInputEdit(false);
+  };
+
+  const handleDeleteList = () => {
+    if (!ActivityListId || !frameId) return;
+    deleteList && deleteList(ActivityListId, frameId);
+    setAddInputEdit(false);
+  };
+
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
       <div
@@ -50,16 +80,52 @@ export const ContainerCard = ({
        p-3 flex flex-col gap-3 rounded-xl border-collapse border-2 border-gray-900"
       >
         <div className="list-top flex justify-between items-center px-3">
-          <p className="text-sm font-semibold opacity-50">{title}</p>
-          <DropDownButton textName="...">
-            <ul
-              className="text-sm flex flex-col gap-2"
-              aria-labelledby="dropdownDefaultButton"
-            >
-              <li className="cursor-pointer button-hover p-2">Editar</li>
-              <li className="cursor-pointer button-hover p-2">Excluir</li>
-            </ul>
-          </DropDownButton>
+          {!addInputEdit ? (
+            <>
+              <p className="text-sm font-semibold opacity-50">{title}</p>
+              <DropDownButton textName="...">
+                <ul
+                  className="text-sm flex flex-col gap-2"
+                  aria-labelledby="dropdownDefaultButton"
+                >
+                  <li
+                    className="cursor-pointer button-hover p-2"
+                    onClick={handleaddInputEdit}
+                  >
+                    Editar
+                  </li>
+                  <li className="cursor-pointer button-hover p-2">
+                    <ModalComponent
+                      title="Excluir"
+                      funcConfirm={handleDeleteList}
+                    />
+                  </li>
+                </ul>
+              </DropDownButton>
+            </>
+          ) : (
+            <div className="flex gap-2 items-center justify-center">
+              <input
+                type="text"
+                name="updateName"
+                id="updateName"
+                onChange={handleInput('updateName')}
+                placeholder="Editar"
+                className="overflow-hidden resize-none text-sm drop-shadow-2xl py-2
+                 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
+              />
+              <div className="flex gap-2">
+                <ButtonGreen
+                  children="Salvar"
+                  buttonProps={{ onClick: handleEditList }}
+                />
+                <ButtonRed
+                  children="X"
+                  buttonProps={{ onClick: () => setAddInputEdit(false) }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="shadow flex flex-col p-2 gap-3 items-center overflow-y-auto drop-shadow-xl">
@@ -69,7 +135,7 @@ export const ContainerCard = ({
             <span className="text-sm text-gray-400">Sem cartões..</span>
           )}
         </div>
-        {!addInput && (
+        {!addInput ? (
           <div className="w-full flex flex-col">
             <button
               onClick={handleAddInput}
@@ -78,9 +144,8 @@ export const ContainerCard = ({
               <MoreSvg /> Adicionar um cartão
             </button>
           </div>
-        )}
-        {addInput && (
-          <div className="w-full flex flex-col">
+        ) : (
+          <div className="w-full flex flex-col" ref={refOutSide}>
             <input
               type="text"
               name="name"
@@ -89,7 +154,7 @@ export const ContainerCard = ({
               placeholder="Digite o nome do cartão"
               className="overflow-hidden resize-none text-sm drop-shadow-2xl py-6 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
             />
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 ">
               <ButtonGreen
                 children="Criar cartão"
                 buttonProps={{ onClick: handleAddCard }}

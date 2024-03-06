@@ -7,7 +7,7 @@ import {
 } from '../util/connections/auth';
 
 export type FrameContextType = {
-  getFrames: () => Promise<Quadro[] | null>;
+  getFrames: (userId: number) => Promise<Quadro[] | null>;
   createFrame: (userId: number, name: string) => Promise<Quadro | null>;
   deleteFrame: (id: number, userId: number) => Promise<void>;
   updateFrame: (
@@ -23,13 +23,13 @@ type FrameProviderProps = {
 const FrameContext = createContext<FrameContextType | undefined>(undefined);
 
 const FrameProvider = ({ children }: FrameProviderProps) => {
-  const getFrames = async () => {
+  const getFrames = async (userId: number) => {
     const token = getTokenFromLocalStorage();
     if (!token) null;
 
     try {
       getAuthorizationToken(token);
-      const response = await connectionAPI.get<Quadro[]>('/frame');
+      const response = await connectionAPI.get<Quadro[]>(`/frame/${userId}`);
 
       return response.data;
     } catch (error) {

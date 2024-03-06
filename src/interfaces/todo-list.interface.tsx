@@ -12,7 +12,7 @@ interface Quadro {
   id: number;
   name: string;
   activitiesList?: List[];
-  owner?: number;
+  userId?: number;
 }
 
 interface List {

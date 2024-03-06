@@ -8,6 +8,7 @@ import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { useList } from '../../context/ListContext';
 import { ContainerCard } from './container-card';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 
 type ContainerListProps = {
   list: List[] | null;
@@ -15,6 +16,8 @@ type ContainerListProps = {
   frameId?: number;
   updateListData?: () => void;
   updateCardData?: () => void;
+  updateList?: (listId: number, frameId: number, name: string) => void;
+  deleteList?: (listId: number, frameId: number) => void;
 };
 
 export const ContainerList = ({
@@ -23,6 +26,8 @@ export const ContainerList = ({
   frameId,
   updateListData,
   updateCardData,
+  updateList,
+  deleteList,
 }: ContainerListProps) => {
   const { input, handleInput } = useChangeInput({ name: '' });
   const [addInput, setAddInput] = useState(false);
@@ -67,7 +72,10 @@ export const ContainerList = ({
           </button>
         )}
         {addInput && (
-          <div className="flex justify-center items-center gap-2">
+          <div
+            className="flex justify-center items-center gap-2"
+            ref={refInput}
+          >
             <input
               value={input.name}
               onChange={handleInput('name')}
@@ -79,8 +87,9 @@ export const ContainerList = ({
                resize-none text-sm rounded-lg outline-none p-2 
                bg-BlackTheme-list drop-shadow-lg text-gray-400
                border border-gray-400 w-full"
+              onClick={useStopPropagation().stopPropagation}
             />
-            <div ref={refInput} className="flex w-full gap-2">
+            <div className="flex w-full gap-2">
               <ButtonGreen
                 children="Criar"
                 buttonProps={{
@@ -112,6 +121,9 @@ export const ContainerList = ({
                   }
                   ActivityListId={item.id}
                   updateCardData={updateCardData}
+                  updateList={updateList}
+                  frameId={frameId}
+                  deleteList={deleteList}
                 />
               ),
           )
