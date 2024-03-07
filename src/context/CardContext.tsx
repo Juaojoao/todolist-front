@@ -9,6 +9,8 @@ import { connectionAPI } from '../services/api/api';
 type CardContextType = {
   getCards: () => Promise<Card[] | null>;
   createCard: (name: string, activitiesListId: number) => Promise<Card | null>;
+  uploadCard: (cardId: number, data: Card) => void;
+  deleteCard: (cardId: number, activitiesListId: number) => void;
 };
 
 type CardProviderProps = {
@@ -47,8 +49,35 @@ export const CardProvider = ({ children }: CardProviderProps) => {
     }
   };
 
+  const uploadCard = async (cardId: number, data: Card) => {
+    const token = getTokenFromLocalStorage();
+    if (!token) null;
+    try {
+      getAuthorizationToken(token);
+
+      await connectionAPI.patch(`/card/update/${cardId}`, data);
+    } catch (error) {
+      console.error('Error updating Card', error);
+      return null;
+    }
+  };
+
+  const deleteCard = async (cardId: number, activitiesListId: number) => {
+    const token = getTokenFromLocalStorage();
+    if (!token) null;
+    try {
+      getAuthorizationToken(token);
+      await connectionAPI.delete(`/card/delete/${cardId}/${activitiesListId}`);
+    } catch (error) {
+      console.error('Error deleting Card', error);
+      return null;
+    }
+  };
+
   return (
-    <CardContext.Provider value={{ getCards, createCard }}>
+    <CardContext.Provider
+      value={{ getCards, createCard, uploadCard, deleteCard }}
+    >
       {children}
     </CardContext.Provider>
   );

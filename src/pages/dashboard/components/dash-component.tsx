@@ -25,9 +25,8 @@ export const ListTodo = () => {
   const { createFrame } = useFrame();
   const { getInfoUser } = useUser();
   const { getFrames, updateFrame, deleteFrame } = useFrame();
-  const { getLists, updateList, deleteList } = useList();
-  const { getCards } = useCard();
-
+  const { getLists, updateList, deleteList, createList } = useList();
+  const { getCards, createCard, uploadCard, deleteCard } = useCard();
   const { token } = useAuth();
 
   const navigate = useNavigate();
@@ -64,23 +63,16 @@ export const ListTodo = () => {
     }
   }, [token]);
 
-  const handleSelectFrame = (projectId: number) => {
-    if (!frameData || !projectId) return;
-    const selectedFrame = frameData?.find((frame) => frame.id === projectId);
-    const lists = selectedFrame?.activitiesList || [];
-    setSelectedFrame(selectedFrame?.id);
-    setListData(lists);
-  };
-
   // Frame
-  const addFrame = async (frameId: number, name: string) => {
+
+  const createFramePost = async (frameId: number, name: string) => {
     if (!userData?.id || !frameId) return;
     await createFrame(frameId, name);
     const frames = await getFrames(userData?.id);
     setFrameData(frames);
   };
 
-  const updatePatchFrame = async (frameId: number, name: string) => {
+  const uploadFramePatch = async (frameId: number, name: string) => {
     if (!userData || !frameId) return;
     await updateFrame(frameId, { userId: userData.id, name });
     const frames = await getFrames(userData?.id);
@@ -91,12 +83,33 @@ export const ListTodo = () => {
     if (!userData || !frameId) return;
     await deleteFrame(frameId, userData.id);
     const frames = await getFrames(userData?.id);
+    const lists = await getLists();
     setFrameData(frames);
+    setListData(lists);
+  };
+
+  const handleSelectFrame = (projectId: number) => {
+    if (!frameData || !projectId) return;
+    const selectedFrame = frameData?.find((frame) => frame.id === projectId);
+    const lists = selectedFrame?.activitiesList || [];
+    setSelectedFrame(selectedFrame?.id);
+    setListData(lists);
   };
 
   // List
 
-  const updatePatchList = async (
+  const updateListGet = async () => {
+    const lists = await getLists();
+    setListData(lists);
+  };
+
+  const createListPost = async (name: string, frameId: number) => {
+    if (!frameId || !name) return;
+    await createList(name, frameId);
+    await updateListGet();
+  };
+
+  const updateListPatch = async (
     listId: number,
     frameId: number,
     name: string,
@@ -104,25 +117,37 @@ export const ListTodo = () => {
     if (!listId || !frameId || !name) return;
 
     await updateList(listId, { frameId, name });
-    const lists = await getLists();
-    setListData(lists);
+    await updateListGet();
   };
 
   const deleteListId = async (listId: number, frameId: number) => {
     if (!listId || !frameId) return;
     await deleteList(listId, frameId);
-    const lists = await getLists();
-    setListData(lists);
+    await updateListGet();
   };
 
-  const updateListData = async () => {
-    const lists = await getLists();
-    setListData(lists);
-  };
-
-  const updateCardData = async () => {
+  // Card
+  const updateCardGet = async () => {
     const cards = await getCards();
     setCardData(cards);
+  };
+
+  const createCardPost = async (name: string, ActivityListId: number) => {
+    if (!ActivityListId || !name) return;
+    await createCard(name, ActivityListId);
+    await updateCardGet();
+  };
+
+  const updateCardPatch = async (cardId: number, data: Card) => {
+    if (!cardId || !data) return;
+    await uploadCard(cardId, data);
+    await updateCardGet();
+  };
+
+  const deleteCardId = async (cardId: number, activitiesListId: number) => {
+    if (!cardId || !activitiesListId) return;
+    await deleteCard(cardId, activitiesListId);
+    await updateCardGet();
   };
 
   return (
@@ -130,9 +155,9 @@ export const ListTodo = () => {
       <Sidebar
         projects={frameData}
         handleSelectProject={handleSelectFrame}
-        handleUpdateProject={updatePatchFrame}
+        handleUpdateProject={uploadFramePatch}
         handleDeleteProject={deleteFrameId}
-        handleAddProject={addFrame}
+        handleAddProject={createFramePost}
         selectedProject={selectedFrame}
         userId={userData?.id}
       />
@@ -144,10 +169,12 @@ export const ListTodo = () => {
             list={listData}
             card={cardData}
             frameId={selectedFrame}
-            updateListData={updateListData}
-            updateCardData={updateCardData}
-            updateList={updatePatchList}
+            createList={createListPost}
+            updateList={updateListPatch}
             deleteList={deleteListId}
+            createCard={createCardPost}
+            updateCard={updateCardPatch}
+            deleteCard={deleteCardId}
           />
         </div>
       </div>

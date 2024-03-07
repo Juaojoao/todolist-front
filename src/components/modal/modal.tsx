@@ -3,15 +3,17 @@ import {
   Button,
   Dialog,
   DialogHeader,
+  DialogBody,
   DialogFooter,
 } from '@material-tailwind/react';
 
 type ModalProps = {
   title: string;
+  dialog?: string;
   funcConfirm?: () => void;
 };
 
-export const ModalComponent = ({ title, funcConfirm }: ModalProps) => {
+export const ModalComponent = ({ title, funcConfirm, dialog }: ModalProps) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(!open);
 
@@ -29,6 +31,11 @@ export const ModalComponent = ({ title, funcConfirm }: ModalProps) => {
         <DialogHeader className="text-gray-300">
           Você tem certeza desta ação?
         </DialogHeader>
+        {dialog && (
+          <DialogBody className="text-gray-300">
+            <p>{dialog}</p>
+          </DialogBody>
+        )}
         <DialogFooter>
           <Button
             variant="text"

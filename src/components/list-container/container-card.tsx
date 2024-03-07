@@ -4,7 +4,6 @@ import { ButtonRed } from '../buttons/buttonRed';
 import { CardTodo } from '../card/card';
 import { MoreSvg } from '../svg/more';
 import { Card } from '../../interfaces/todo-list.interface';
-import { useCard } from '../../context/CardContext';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
@@ -13,26 +12,32 @@ import { ModalComponent } from '../modal/modal';
 type ContainerCardProps = {
   title: string;
   cards: Card[];
+  frameId?: number;
   ActivityListId?: number;
-  updateCardData?: () => void;
   updateList?: (listId: number, frameId: number, name: string) => void;
   deleteList?: (listId: number, frameId: number) => void;
-  frameId?: number;
+  createCard?: (name: string, ActivityListId: number) => void;
+  updateCard?: (cardId: number, data: Card) => void;
+  deleteCard?: (cardId: number, activitiesListId: number) => void;
 };
 
 export const ContainerCard = ({
   title,
   cards,
-  ActivityListId,
-  updateCardData,
-  updateList,
   frameId,
+  ActivityListId,
+  updateList,
   deleteList,
+  createCard,
+  updateCard,
+  deleteCard,
 }: ContainerCardProps) => {
-  const { input, handleInput } = useChangeInput({ name: '', updateName: '' });
+  const { input, handleInput } = useChangeInput({
+    createCard: '',
+    updateListName: '',
+  });
   const [addInputEdit, setAddInputEdit] = useState(false);
   const [addInput, setAddInput] = useState(false);
-  const { createCard } = useCard();
   const refOutSide = useRef(null);
 
   useClickOutside({ ref: refOutSide, callback: () => setAddInput(false) });
@@ -46,24 +51,33 @@ export const ContainerCard = ({
   };
 
   const handleAddCard = async () => {
-    if (input.name === '') return;
+    if (input.createCard === '' || !ActivityListId || !createCard) return;
+    createCard(input.createCard, ActivityListId);
+    input.createCard = '';
+    setAddInput(false);
+  };
 
-    if (ActivityListId !== undefined) {
-      await createCard(input.name, ActivityListId);
-      input.name = '';
-      setAddInput(false);
+  const handleEditCard = (cardId: number, name: string) => {
+    if (!updateCard || !name) return;
 
-      if (updateCardData) {
-        updateCardData();
-      }
-    }
+    updateCard(cardId, { name: name, activitiesListId: ActivityListId });
+  };
+
+  const handleDeleteCard = (cardId: number) => {
+    if (!deleteCard || !ActivityListId) return;
+    deleteCard(cardId, ActivityListId);
   };
 
   const handleEditList = () => {
-    if (!ActivityListId || input.updateName === '' || !frameId || !updateList)
+    if (
+      !ActivityListId ||
+      input.updateListName === '' ||
+      !frameId ||
+      !updateList
+    )
       return;
-    updateList(ActivityListId, frameId, input.updateName);
-    input.updateName = '';
+    updateList(ActivityListId, frameId, input.updateListName);
+    input.updateListName = '';
     setAddInputEdit(false);
   };
 
@@ -89,7 +103,7 @@ export const ContainerCard = ({
                   aria-labelledby="dropdownDefaultButton"
                 >
                   <li
-                    className="cursor-pointer button-hover p-2"
+                    className="cursor-pointer button-hover p-2 w-full text-center"
                     onClick={handleaddInputEdit}
                   >
                     Editar
@@ -107,9 +121,9 @@ export const ContainerCard = ({
             <div className="flex gap-2 items-center justify-center">
               <input
                 type="text"
-                name="updateName"
-                id="updateName"
-                onChange={handleInput('updateName')}
+                name="updateListName"
+                id="updateListName"
+                onChange={handleInput('updateListName')}
                 placeholder="Editar"
                 className="overflow-hidden resize-none text-sm drop-shadow-2xl py-2
                  w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
@@ -130,7 +144,14 @@ export const ContainerCard = ({
 
         <div className="shadow flex flex-col p-2 gap-3 items-center overflow-y-auto drop-shadow-xl">
           {cards?.length > 0 ? (
-            cards.map((card) => <CardTodo card={card} key={card.id} />)
+            cards.map((card) => (
+              <CardTodo
+                card={card}
+                key={card.id}
+                updateCard={handleEditCard}
+                deleteCard={handleDeleteCard}
+              />
+            ))
           ) : (
             <span className="text-sm text-gray-400">Sem cartões..</span>
           )}
@@ -148,13 +169,13 @@ export const ContainerCard = ({
           <div className="w-full flex flex-col" ref={refOutSide}>
             <input
               type="text"
-              name="name"
-              id="name"
-              onChange={handleInput('name')}
+              name="createCard"
+              id="createCard"
+              onChange={handleInput('createCard')}
               placeholder="Digite o nome do cartão"
               className="overflow-hidden resize-none text-sm drop-shadow-2xl py-6 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
             />
-            <div className="flex gap-2 ">
+            <div className="flex gap-2 mt-2">
               <ButtonGreen
                 children="Criar cartão"
                 buttonProps={{ onClick: handleAddCard }}

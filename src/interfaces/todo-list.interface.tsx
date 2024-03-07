@@ -23,10 +23,10 @@ interface List {
 }
 
 interface Card {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
   description?: string;
-  createdAt: string;
+  createdAt?: string;
   tasklist?: Task[];
   activitiesListId?: number;
 }
