@@ -2,7 +2,7 @@ import { ProgressSvg } from '../svg/progress';
 import { Progress } from '@material-tailwind/react';
 import { Card } from '../../interfaces/todo-list.interface';
 import { DropDownButton } from '../buttons/dropDown';
-import { ModalComponent } from '../modal/modal';
+import { ModalComponent } from '../modal/modalAlert';
 import { useRef, useState } from 'react';
 import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
@@ -67,16 +67,23 @@ export const CardTodo = ({ card, updateCard, deleteCard }: CardTodoProps) => {
     deleteCard(cardId);
   };
 
+  const handleCardSelect = () => {
+    console.log(card.id);
+  };
+
   return (
     <div
       key={card.id}
+      onClick={handleCardSelect}
       className="card-todo cursor-pointer w-full h-44 bg-BlackTheme-card p-5 rounded-xl drop-shadow-lg"
     >
       <div className="card-desc flex justify-between items-center">
         {!addInputEdit ? (
           <>
             <div className="card-desc-wrapper flex flex-col gap-1">
-              <h3 className="font-bold">{card.name}</h3>
+              {card.name && card.name?.length > 12
+                ? `${card.name.substring(0, 12)}...`
+                : card.name}
               <p className="font-medium text-xs opacity-50">
                 {card.description}
               </p>

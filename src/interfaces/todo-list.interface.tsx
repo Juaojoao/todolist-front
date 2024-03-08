@@ -16,8 +16,8 @@ interface Quadro {
 }
 
 interface List {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
   cards?: Card[];
   frameId?: number;
 }

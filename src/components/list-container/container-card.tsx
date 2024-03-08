@@ -7,10 +7,10 @@ import { Card } from '../../interfaces/todo-list.interface';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
-import { ModalComponent } from '../modal/modal';
+import { ModalComponent } from '../modal/modalAlert';
 
 type ContainerCardProps = {
-  title: string;
+  title?: string;
   cards: Card[];
   frameId?: number;
   ActivityListId?: number;
@@ -96,7 +96,12 @@ export const ContainerCard = ({
         <div className="list-top flex justify-between items-center px-3">
           {!addInputEdit ? (
             <>
-              <p className="text-sm font-semibold opacity-50">{title}</p>
+              <p className="text-sm font-semibold opacity-50">
+                {title && title?.length > 20
+                  ? `${title.substring(0, 20)}...`
+                  : title}
+              </p>
+
               <DropDownButton textName="...">
                 <ul
                   className="text-sm flex flex-col gap-2"

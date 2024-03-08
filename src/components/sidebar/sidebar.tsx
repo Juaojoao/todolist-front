@@ -11,7 +11,7 @@ import { ButtonGreen } from '../buttons/buttonGreen';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
-import { ModalComponent } from '../modal/modal';
+import { ModalComponent } from '../modal/modalAlert';
 
 type Project = {
   id: number;
@@ -169,9 +169,9 @@ export const Sidebar = ({
                       </animated.div>
                     ),
                 )}
-                {projects?.map((project, index) => (
+                {projects?.map((project) => (
                   <a
-                    key={index}
+                    key={project.id}
                     className={`button-hover cursor-pointer p-3 flex gap-3 items-center w-full ${
                       selectedProject === project.id ? 'bg-gray-800' : ''
                     }`}

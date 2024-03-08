@@ -6,10 +6,10 @@ import {
 } from '../util/connections/auth';
 import { connectionAPI } from '../services/api/api';
 
-type CardContextType = {
+export type CardContextType = {
   getCards: () => Promise<Card[] | null>;
-  createCard: (name: string, activitiesListId: number) => Promise<Card | null>;
-  uploadCard: (cardId: number, data: Card) => void;
+  createCard: (name: string, activitiesListId: number) => void;
+  updateCard: (cardId: number, data: Card) => void;
   deleteCard: (cardId: number, activitiesListId: number) => void;
 };
 
@@ -49,7 +49,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
     }
   };
 
-  const uploadCard = async (cardId: number, data: Card) => {
+  const updateCard = async (cardId: number, data: Card) => {
     const token = getTokenFromLocalStorage();
     if (!token) null;
     try {
@@ -76,7 +76,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
 
   return (
     <CardContext.Provider
-      value={{ getCards, createCard, uploadCard, deleteCard }}
+      value={{ getCards, createCard, updateCard, deleteCard }}
     >
       {children}
     </CardContext.Provider>

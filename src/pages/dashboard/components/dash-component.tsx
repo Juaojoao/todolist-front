@@ -14,6 +14,9 @@ import { useUser } from '../../../context/UserContext';
 import { useCard } from '../../../context/CardContext';
 import { useFrame } from '../../../context/FrameContext';
 import { useList } from '../../../context/ListContext';
+import { FrameService } from '../../../services/api/frameService';
+import { CardService } from '../../../services/api/cardService';
+import { ListService } from '../../../services/api/listService';
 
 export const ListTodo = () => {
   const [frameData, setFrameData] = useState<Quadro[] | null>(null);
@@ -22,39 +25,33 @@ export const ListTodo = () => {
   const [selectedFrame, setSelectedFrame] = useState<number>();
   const [userData, setUserData] = useState<User | null>(null);
 
-  const { createFrame } = useFrame();
   const { getInfoUser } = useUser();
-  const { getFrames, updateFrame, deleteFrame } = useFrame();
-  const { getLists, updateList, deleteList, createList } = useList();
-  const { getCards, createCard, uploadCard, deleteCard } = useCard();
   const { token } = useAuth();
-
   const navigate = useNavigate();
+
+  const frameService = FrameService(useFrame());
+  const cardService = CardService(useCard());
+  const listService = ListService(useList());
 
   useEffect(() => {
     if (token) {
       const fetch = async () => {
         const user = await getInfoUser();
         if (!user) return;
+
         setUserData(user);
 
-        const frames = await getFrames(user?.id);
+        const frames = await frameService.onGetFrames(user.id);
         const framesOwner = frames?.find((frame) => frame.userId === user?.id);
 
-        if (framesOwner) {
-          setFrameData(frames);
-        }
-
-        const cards = await getCards();
-        setCardData(cards);
-
-        const lists = framesOwner?.activitiesList || [];
-        setListData(lists);
-
-        if (frames && frames.length > 0) {
+        if (framesOwner && frames && frames?.length > 0) {
+          setFrameData(frames || []);
           setSelectedFrame(frames[0].id);
-          setListData(frames[0].activitiesList || []);
+          setListData(framesOwner.activitiesList || []);
         }
+
+        const cards = await cardService.onGetCard();
+        setCardData(cards);
       };
 
       fetch();
@@ -66,26 +63,28 @@ export const ListTodo = () => {
   // Frame
 
   const createFramePost = async (frameId: number, name: string) => {
-    if (!userData?.id || !frameId) return;
-    await createFrame(frameId, name);
-    const frames = await getFrames(userData?.id);
-    setFrameData(frames);
+    const frames = await frameService.onCreateFrame(
+      frameId,
+      name,
+      userData?.id,
+    );
+    if (frames) setFrameData(frames);
   };
 
   const uploadFramePatch = async (frameId: number, name: string) => {
-    if (!userData || !frameId) return;
-    await updateFrame(frameId, { userId: userData.id, name });
-    const frames = await getFrames(userData?.id);
-    setFrameData(frames);
+    const frames = await frameService.onUpdateFrame(
+      frameId,
+      name,
+      userData?.id,
+    );
+    if (frames) setFrameData(frames);
   };
 
   const deleteFrameId = async (frameId: number) => {
-    if (!userData || !frameId) return;
-    await deleteFrame(frameId, userData.id);
-    const frames = await getFrames(userData?.id);
-    const lists = await getLists();
-    setFrameData(frames);
-    setListData(lists);
+    const frames = await frameService.onDeleteFrame(frameId, userData?.id);
+    if (frames) setFrameData(frames);
+    const lists = await listService.onGetlist();
+    if (lists) setListData(lists);
   };
 
   const handleSelectFrame = (projectId: number) => {
@@ -98,15 +97,9 @@ export const ListTodo = () => {
 
   // List
 
-  const updateListGet = async () => {
-    const lists = await getLists();
-    setListData(lists);
-  };
-
   const createListPost = async (name: string, frameId: number) => {
-    if (!frameId || !name) return;
-    await createList(name, frameId);
-    await updateListGet();
+    const list = await listService.onCreateList(name, frameId);
+    if (list) setListData(list);
   };
 
   const updateListPatch = async (
@@ -114,40 +107,30 @@ export const ListTodo = () => {
     frameId: number,
     name: string,
   ) => {
-    if (!listId || !frameId || !name) return;
-
-    await updateList(listId, { frameId, name });
-    await updateListGet();
+    const list = await listService.onUpdateList(listId, { frameId, name });
+    if (list) setListData(list);
   };
 
   const deleteListId = async (listId: number, frameId: number) => {
-    if (!listId || !frameId) return;
-    await deleteList(listId, frameId);
-    await updateListGet();
+    const list = await listService.onDeleteList(listId, frameId);
+    if (list) setListData(list);
   };
 
   // Card
-  const updateCardGet = async () => {
-    const cards = await getCards();
-    setCardData(cards);
-  };
 
   const createCardPost = async (name: string, ActivityListId: number) => {
-    if (!ActivityListId || !name) return;
-    await createCard(name, ActivityListId);
-    await updateCardGet();
+    const cards = await cardService.onCreateCard(name, ActivityListId);
+    if (cards) setCardData(cards);
   };
 
   const updateCardPatch = async (cardId: number, data: Card) => {
-    if (!cardId || !data) return;
-    await uploadCard(cardId, data);
-    await updateCardGet();
+    const cards = await cardService.onUpdateCard(cardId, data);
+    if (cards) setCardData(cards);
   };
 
   const deleteCardId = async (cardId: number, activitiesListId: number) => {
-    if (!cardId || !activitiesListId) return;
-    await deleteCard(cardId, activitiesListId);
-    await updateCardGet();
+    const cards = await cardService.onDeleteCard(cardId, activitiesListId);
+    if (cards) setCardData(cards);
   };
 
   return (

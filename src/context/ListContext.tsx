@@ -5,12 +5,9 @@ import { connectionAPI } from '../services/api/api';
 
 export type ListContextType = {
   getLists: () => Promise<List[] | null>;
-  createList: (name: string, frameId: number) => Promise<void>;
-  updateList: (
-    id: number,
-    data: { frameId: number; name: string },
-  ) => Promise<void>;
-  deleteList: (listId: number, frameId: number) => Promise<void>;
+  createList: (name: string, frameId: number) => void;
+  updateList: (id: number, data: List) => void;
+  deleteList: (listId: number, frameId: number) => void;
 };
 
 type ListProviderProps = {
@@ -47,10 +44,7 @@ export const ListProvider = ({ children }: ListProviderProps) => {
     }
   };
 
-  const updateList = async (
-    id: number,
-    data: { frameId: number; name: string },
-  ) => {
+  const updateList = async (id: number, data: List) => {
     const token = getTokenFromLocalStorage();
     if (!token) return null;
     try {
