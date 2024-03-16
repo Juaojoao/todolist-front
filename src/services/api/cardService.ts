@@ -20,7 +20,7 @@ export const CardService = (cardContext: CardContextType) => {
     return await getCards();
   };
 
-  const onDeleteCard = async (cardId: number, listId?: number) => {
+  const onDeleteCard = async (cardId?: number, listId?: number) => {
     if (!cardId || !listId) return;
     await deleteCard(cardId, listId);
     return await getCards();

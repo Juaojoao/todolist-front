@@ -1,43 +1,37 @@
-import { FrameContextType } from '../../context/FrameContext';
+import { Quadro } from '../../interfaces/todo-list.interface';
+import { connectionAPI } from './api';
 
-export const FrameService = (frameContext: FrameContextType) => {
-  const { getFrames, createFrame, updateFrame, deleteFrame } = frameContext;
+export class FrameService {
+  constructor(private api = connectionAPI) {}
 
-  const onGetFrames = async (userId: number) => {
-    if (!userId) return;
-    return await getFrames(userId);
-  };
+  async createFrame({ userId, name }: Quadro) {
+    if (!userId || !name) return;
+    const UserId = Number(userId);
+    try {
+      await this.api.post('frame/create', { UserId, name });
+    } catch (error) {
+      console.error('Error creating Frame', error);
+    }
+  }
 
-  const onCreateFrame = async (
-    frameId: number,
-    name: string,
-    userId?: number,
-  ) => {
-    if (!frameId || !name || !userId) return;
-    await createFrame(frameId, name);
-    return await getFrames(userId);
-  };
+  // const onGetFrames = async (userId: number) => {
+  //   if (!userId) return;
+  //   return await getFrames(userId);
+  // };
 
-  const onUpdateFrame = async (
-    frameId: number,
-    name: string,
-    userId?: number,
-  ) => {
-    if (!frameId || !name || !userId) return;
-    await updateFrame(frameId, { userId, name });
-    return await getFrames(userId);
-  };
+  // const onUpdateFrame = async (
+  //   frameId: number,
+  //   name: string,
+  //   userId?: number,
+  // ) => {
+  //   if (!frameId || !name || !userId) return;
+  //   await updateFrame(frameId, { userId, name });
+  //   return await getFrames(userId);
+  // };
 
-  const onDeleteFrame = async (frameId: number, userId?: number) => {
-    if (!frameId || !userId) return;
-    await deleteFrame(frameId, userId);
-    return await getFrames(userId);
-  };
-
-  return {
-    onGetFrames,
-    onCreateFrame,
-    onUpdateFrame,
-    onDeleteFrame,
-  };
-};
+  // const onDeleteFrame = async (frameId: number, userId?: number) => {
+  //   if (!frameId || !userId) return;
+  //   await deleteFrame(frameId, userId);
+  //   return await getFrames(userId);
+  // };
+}
