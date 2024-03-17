@@ -1,19 +1,22 @@
-import { ActionRedux } from '../../../interfaces/redux';
-import { FrameService } from '../../api/frameService';
+import { Quadro } from '../../../interfaces/todo-list.interface';
 import { frameActionTypes } from './action-type';
 
+interface actionType {
+  type: string;
+  payload: Quadro[];
+}
+
 const initialState = {
-  name: '',
-  userId: null,
+  frames: [] as Quadro[],
 };
 
-const FrameReducer = async (state = initialState, action: ActionRedux) => {
-  const frameService = new FrameService();
+const FrameReducer = (state = initialState, action: actionType) => {
   switch (action.type) {
-    case frameActionTypes.CREATE_FRAME:
-      const { userId, name } = action.payload;
-      await frameService.createFrame({ userId, name });
-      return state;
+    case frameActionTypes.GET_ALL_FRAMES:
+      return {
+        ...state,
+        frames: action.payload,
+      };
     default:
       return state;
   }

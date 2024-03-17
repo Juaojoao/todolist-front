@@ -1,3 +1,3 @@
 export const frameActionTypes = {
-  CREATE_FRAME: 'frame/create',
+  GET_ALL_FRAMES: 'frame/getAll',
 };

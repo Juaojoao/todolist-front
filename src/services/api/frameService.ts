@@ -1,37 +1,54 @@
 import { Quadro } from '../../interfaces/todo-list.interface';
+import {
+  getAuthorizationToken,
+  getTokenFromLocalStorage,
+} from '../../util/connections/auth';
 import { connectionAPI } from './api';
 
 export class FrameService {
-  constructor(private api = connectionAPI) {}
+  private api = connectionAPI;
+  private token = getTokenFromLocalStorage();
 
-  async createFrame({ userId, name }: Quadro) {
-    if (!userId || !name) return;
+  async createFrame(userId: number, name: string) {
+    if (!userId || !name || !this.token) return;
     const UserId = Number(userId);
     try {
-      await this.api.post('frame/create', { UserId, name });
+      getAuthorizationToken(this.token);
+      await this.api.post('frame/create', { userId: UserId, name: name });
     } catch (error) {
       console.error('Error creating Frame', error);
     }
   }
 
-  // const onGetFrames = async (userId: number) => {
-  //   if (!userId) return;
-  //   return await getFrames(userId);
-  // };
+  async getAllFrames(userId?: number) {
+    if (!userId || !this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      return (await this.api.get<Quadro[]>(`/frame/${userId}`)).data;
+    } catch (error) {
+      console.error('Error getting Frame', error);
+      return null;
+    }
+  }
 
-  // const onUpdateFrame = async (
-  //   frameId: number,
-  //   name: string,
-  //   userId?: number,
-  // ) => {
-  //   if (!frameId || !name || !userId) return;
-  //   await updateFrame(frameId, { userId, name });
-  //   return await getFrames(userId);
-  // };
+  async updateInfoFrame(frameId: number, name: string) {
+    if (!frameId || name === '' || !this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      return await this.api.patch<Quadro>(`/frame/${frameId}`, { name });
+    } catch (error) {
+      console.error('Error updating Frame', error);
+      return null;
+    }
+  }
 
-  // const onDeleteFrame = async (frameId: number, userId?: number) => {
-  //   if (!frameId || !userId) return;
-  //   await deleteFrame(frameId, userId);
-  //   return await getFrames(userId);
-  // };
+  async deleteFrame(frameId: number) {
+    if (!frameId || !this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.delete(`/frame/delete/${frameId}`);
+    } catch (error) {
+      console.error('Error deleting Frame', error);
+    }
+  }
 }
