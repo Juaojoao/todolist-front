@@ -5,3 +5,8 @@ export const getAllFrames = (payload: Quadro[]) => ({
   type: frameActionTypes.GET_ALL_FRAMES,
   payload,
 });
+
+export const filterFrames = (payload: number) => ({
+  type: frameActionTypes.SELETED_FRAMES,
+  payload,
+});
