@@ -2,11 +2,6 @@ import { ActionRedux } from '../../../interfaces/redux';
 import { List } from '../../../interfaces/todo-list.interface';
 import { listActionTypes } from './action-type';
 
-interface actionType {
-  type: string;
-  payload: List[] | any;
-}
-
 const initialState = {
   list: [] as List[],
   filterList: [] as List[],
