@@ -3,89 +3,99 @@ import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
 import { CardTodo } from '../card/card';
 import { MoreSvg } from '../svg/more';
-import { Card } from '../../interfaces/todo-list.interface';
+import { Card, List, User } from '../../interfaces/todo-list.interface';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { ModalComponent } from '../modal/modalAlert';
+import { ListService } from '../../services/api/listService';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../services/redux/root-reducer';
+import { filterList, getAllList } from '../../services/redux/list/actions';
 
 type ContainerCardProps = {
-  title?: string;
   cards: Card[];
-  frameId?: number;
-  ActivityListId?: number;
-  updateList?: (listId: number, frameId: number, name: string) => void;
-  deleteList?: (listId: number, frameId: number) => void;
-  createCard?: (name: string, ActivityListId: number) => void;
-  updateCard?: (cardId: number, data: Card) => void;
-  deleteCard?: (cardId: number, activitiesListId: number) => void;
+  list: List;
 };
 
-export const ContainerCard = ({
-  title,
-  cards,
-  frameId,
-  ActivityListId,
-  updateList,
-  deleteList,
-  createCard,
-  updateCard,
-  deleteCard,
-}: ContainerCardProps) => {
-  const { input, handleInput } = useChangeInput({
-    createCard: '',
-    updateListName: '',
-  });
+export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const [addInputEdit, setAddInputEdit] = useState(false);
   const [addInput, setAddInput] = useState(false);
   const refOutSide = useRef(null);
 
-  useClickOutside({ ref: refOutSide, callback: () => setAddInput(false) });
+  const frameInfo = useSelector((state: RootState) => state.frameReducer);
+  const userInfo: User = useSelector((state: RootState) => state.UserReducer);
 
-  const handleAddInput = () => {
-    setAddInput(!addInput);
-  };
+  const listService = new ListService();
+  const dispatch = useDispatch();
+  const selectedFrame: number = frameInfo.selectedFrame;
 
-  const handleaddInputEdit = () => {
-    setAddInputEdit(!addInputEdit);
-  };
+  const { input, handleInput } = useChangeInput({
+    createCard: '',
+    updateListName: '',
+  });
 
-  const handleAddCard = async () => {
-    if (input.createCard === '' || !ActivityListId || !createCard) return;
-    createCard(input.createCard, ActivityListId);
-    input.createCard = '';
+  const clickOutside = () => {
     setAddInput(false);
-  };
-
-  const handleEditCard = (cardId: number, name: string) => {
-    if (!updateCard || !name) return;
-
-    updateCard(cardId, { name: name, activitiesListId: ActivityListId });
-  };
-
-  const handleDeleteCard = (cardId: number) => {
-    if (!deleteCard || !ActivityListId) return;
-    deleteCard(cardId, ActivityListId);
-  };
-
-  const handleEditList = () => {
-    if (
-      !ActivityListId ||
-      input.updateListName === '' ||
-      !frameId ||
-      !updateList
-    )
-      return;
-    updateList(ActivityListId, frameId, input.updateListName);
-    input.updateListName = '';
     setAddInputEdit(false);
   };
 
-  const handleDeleteList = () => {
-    if (!ActivityListId || !frameId) return;
-    deleteList && deleteList(ActivityListId, frameId);
-    setAddInputEdit(false);
+  useClickOutside({ ref: refOutSide, callback: () => clickOutside() });
+
+  const handleaddInputEdit = () => setAddInputEdit(!addInputEdit);
+  const handleAddInput = () => setAddInput(!addInput);
+
+  const handleEditList = async ({ id }: List) => {
+    if (!id || input.updateListName === '') return;
+
+    try {
+      await listService.updateList(id, input.updateListName);
+      setAddInputEdit(false);
+
+      const newLists = await listService.getAllList(userInfo.id);
+      if (!newLists) return;
+
+      dispatch(getAllList(newLists));
+      dispatch(filterList(selectedFrame));
+    } catch (error) {
+      console.error('Error deleting List', error);
+    }
   };
+
+  const handleDeleteList = async ({ id }: List) => {
+    if (!id) return;
+
+    try {
+      await listService.deleteList(id);
+      setAddInputEdit(false);
+
+      const newLists = await listService.getAllList(userInfo.id);
+      if (!newLists) return;
+
+      dispatch(getAllList(newLists));
+      dispatch(filterList(selectedFrame));
+    } catch (error) {
+      console.error('Error deleting List', error);
+    }
+  };
+
+  // const handleAddCard = async () => {
+  //   if (input.createCard === '' || !ActivityListId || !createCard) return;
+  //   createCard(input.createCard, ActivityListId);
+  //   input.createCard = '';
+  //   setAddInput(false);
+  // };
+
+  // const handleEditCard = (cardId: number, name: string) => {
+  //   if (!updateCard || !name) return;
+
+  //   updateCard(cardId, { name: name, activitiesListId: ActivityListId });
+  // };
+
+  // const handleDeleteCard = (cardId: number) => {
+  //   if (!deleteCard || !ActivityListId) return;
+  //   deleteCard(cardId, ActivityListId);
+  // };
 
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
@@ -97,9 +107,9 @@ export const ContainerCard = ({
           {!addInputEdit ? (
             <>
               <p className="text-sm font-semibold opacity-50">
-                {title && title?.length > 20
-                  ? `${title.substring(0, 20)}...`
-                  : title}
+                {list.name && list?.name?.length > 20
+                  ? `${list.name.substring(0, 20)}...`
+                  : list.name}
               </p>
 
               <DropDownButton textName="...">
@@ -116,14 +126,17 @@ export const ContainerCard = ({
                   <li className="cursor-pointer button-hover p-2">
                     <ModalComponent
                       title="Excluir"
-                      funcConfirm={handleDeleteList}
+                      funcConfirm={() => handleDeleteList({ id: list.id })}
                     />
                   </li>
                 </ul>
               </DropDownButton>
             </>
           ) : (
-            <div className="flex gap-2 items-center justify-center">
+            <div
+              className="flex gap-2 items-center justify-center"
+              ref={refOutSide}
+            >
               <input
                 type="text"
                 name="updateListName"
@@ -136,7 +149,9 @@ export const ContainerCard = ({
               <div className="flex gap-2">
                 <ButtonGreen
                   children="Salvar"
-                  buttonProps={{ onClick: handleEditList }}
+                  buttonProps={{
+                    onClick: () => handleEditList({ id: list.id }),
+                  }}
                 />
                 <ButtonRed
                   children="X"
@@ -149,18 +164,12 @@ export const ContainerCard = ({
 
         <div className="shadow flex flex-col p-2 gap-3 items-center overflow-y-auto drop-shadow-xl">
           {cards?.length > 0 ? (
-            cards.map((card) => (
-              <CardTodo
-                card={card}
-                key={card.id}
-                updateCard={handleEditCard}
-                deleteCard={handleDeleteCard}
-              />
-            ))
+            cards.map((card) => <CardTodo card={card} key={card.id} />)
           ) : (
             <span className="text-sm text-gray-400">Sem cartões..</span>
           )}
         </div>
+
         {!addInput ? (
           <div className="w-full flex flex-col">
             <button
@@ -183,7 +192,7 @@ export const ContainerCard = ({
             <div className="flex gap-2 mt-2">
               <ButtonGreen
                 children="Criar cartão"
-                buttonProps={{ onClick: handleAddCard }}
+                // buttonProps={{ onClick: handleAddCard }}
               />
               <ButtonRed
                 children="X"

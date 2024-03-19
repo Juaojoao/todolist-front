@@ -18,6 +18,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const navigate = useNavigate();
+
   const createUser = async (name: string, email: string, password: string) => {
     await connectionAPI.post('/user/create', {
       name,

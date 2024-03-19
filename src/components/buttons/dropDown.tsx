@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useClickOutside } from '../../util/hooks/useClickOutside';
+import { useRef, useState } from 'react';
+import './style.css';
 
 type DropDownButtonProps = {
   textName: string;
@@ -12,13 +14,16 @@ export const DropDownButton = ({
   props,
 }: DropDownButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropDownRef = useRef(null);
+
+  useClickOutside({ ref: dropDownRef, callback: () => setIsOpen(false) });
 
   const toggleDropDown = () => {
     setIsOpen(!isOpen);
   };
 
   return (
-    <div className="relative" {...props}>
+    <div className="relative" {...props} ref={dropDownRef}>
       <div
         id="dropdownDefaultButton"
         onClick={toggleDropDown}
@@ -28,14 +33,13 @@ export const DropDownButton = ({
       >
         {textName}
       </div>
-      {isOpen && (
-        <div
-          id="dropdown"
-          className="drop-shadow-lg z-10 p-2 bg-gray-800 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 absolute top-10 right-0"
-        >
-          {children}
-        </div>
-      )}
+      <div
+        id="dropdown"
+        className={`dropdown-content ${isOpen ? 'visible opacity-100' : 'invisible opacity-0'} ease-in-out transition-all duration-300 
+        drop-shadow-lg z-10 p-2 bg-gray-800 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 absolute top-10 right-0`}
+      >
+        {children}
+      </div>
     </div>
   );
 };

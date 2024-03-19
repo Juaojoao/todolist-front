@@ -1,35 +1,22 @@
-import { CardContextType } from '../../context/CardContext';
 import { Card } from '../../interfaces/todo-list.interface';
+import {
+  getAuthorizationToken,
+  getTokenFromLocalStorage,
+} from '../../util/connections/auth';
+import { connectionAPI } from './api';
 
-export const CardService = (cardContext: CardContextType) => {
-  const { getCards, createCard, updateCard, deleteCard } = cardContext;
+export class CardService {
+  private api = connectionAPI;
+  private token = getTokenFromLocalStorage();
 
-  const onGetCard = async () => {
-    return await getCards();
-  };
-
-  const onCreateCard = async (name: string, listId?: number) => {
-    if (!name || !listId) return;
-    await createCard(name, listId);
-    return await getCards();
-  };
-
-  const onUpdateCard = async (cardId: number, data: Card) => {
-    if (!cardId || !data) return;
-    await updateCard(cardId, data);
-    return await getCards();
-  };
-
-  const onDeleteCard = async (cardId?: number, listId?: number) => {
-    if (!cardId || !listId) return;
-    await deleteCard(cardId, listId);
-    return await getCards();
-  };
-
-  return {
-    onGetCard,
-    onCreateCard,
-    onUpdateCard,
-    onDeleteCard,
-  };
-};
+  async getAllCard(userId?: number) {
+    if (!this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      return (await this.api.get<Card[]>(`/card/get/${userId}`)).data;
+    } catch (error) {
+      console.error('Error getting Card', error);
+      return null;
+    }
+  }
+}

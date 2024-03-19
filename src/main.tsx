@@ -1,25 +1,17 @@
-import "./index.css";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { Router } from "./routes/routes";
-import { UserProvider } from "./context/UserContext";
-import { ListProvider } from "./context/ListContext";
-import { FrameProvider } from "./context/FrameContext";
-import { CardProvider } from "./context/CardContext";
+import './index.css';
+import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter } from 'react-router-dom';
+import store from './services/redux/store';
+import ReactDOM from 'react-dom/client';
+import { Router } from './routes/routes';
+import { Provider } from 'react-redux';
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <AuthProvider>
-      <UserProvider>
-        <FrameProvider>
-          <ListProvider>
-            <CardProvider>
-              <Router />
-            </CardProvider>
-          </ListProvider>
-        </FrameProvider>
-      </UserProvider>
+      <Provider store={store}>
+        <Router />
+      </Provider>
     </AuthProvider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

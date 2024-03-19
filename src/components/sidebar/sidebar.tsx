@@ -12,38 +12,29 @@ import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { ModalComponent } from '../modal/modalAlert';
+import { Quadro, User } from '../../interfaces/todo-list.interface';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../services/redux/root-reducer';
+import { FrameService } from '../../services/api/frameService';
+import { filterFrames, getAllFrames } from '../../services/redux/frame/actions';
+import { filterList } from '../../services/redux/list/actions';
 
-type Project = {
-  id: number;
-  name: string;
-};
-
-type SidebarProps = {
-  handleAddProject?: (id: number, name: string) => void;
-  handleUpdateProject?: (id: number, name: string) => void;
-  handleSelectProject?: (frameId: number) => void;
-  handleDeleteProject?: (frameId: number) => void;
-  projects: Project[] | null;
-  selectedProject?: number | null;
-  userId?: number;
-};
-
-export const Sidebar = ({
-  handleSelectProject,
-  handleUpdateProject,
-  handleDeleteProject,
-  handleAddProject,
-  selectedProject,
-  projects,
-  userId,
-}: SidebarProps) => {
-  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
-  const [addInput, setAddInput] = useState(false);
-  const [open, setOpen] = useState(false);
+export const Sidebar = () => {
+  const userInfo: User = useSelector((state: RootState) => state.UserReducer);
+  const { frames } = useSelector((state: RootState) => state.frameReducer);
 
   const { input, handleInput } = useChangeInput({ name: '' });
   const { logout } = useAuth();
+
+  const frameService = new FrameService();
   const sidebarRef = useRef(null);
+  const dispatch = useDispatch();
+
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
+
+  const [addInput, setAddInput] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const transitions = useTransition(open, {
     from: { opacity: 0, transform: 'translateX(-100%)' },
@@ -64,45 +55,62 @@ export const Sidebar = ({
 
   useClickOutside({ ref: sidebarRef, callback: closeAll });
 
-  const handleClick = () => {
-    setOpen(!open);
+  const handleClick = () => setOpen(!open);
+
+  const handleAddInput = ({ id }: Quadro) => {
+    if (!id) return;
+    setEditingProjectId(id);
   };
 
-  const handleAddInput = (projectId: number) => {
-    setEditingProjectId(projectId);
+  const handleAddButton = () => setAddInput(!addInput);
+
+  const handleCreateFrame = async () => {
+    if (input.name === '' || !userInfo.id) return;
+    try {
+      await frameService.createFrame(userInfo.id, input.name);
+      const newFrames = await frameService.getAllFrames(userInfo.id);
+      if (!newFrames) return;
+
+      input.name = '';
+      setAddInput(false);
+      dispatch(getAllFrames(newFrames));
+    } catch (error) {
+      console.error('Error creating Frame', error);
+    }
   };
 
-  const handleAddButton = () => {
-    setAddInput(!addInput);
+  const handleUpdateFrame = async ({ id }: Quadro) => {
+    if (input.name === '' || !id) return;
+
+    try {
+      await frameService.updateInfoFrame(id, input.name);
+      const newFrames = await frameService.getAllFrames(userInfo.id);
+      if (!newFrames) return;
+
+      input.name = '';
+      setEditingProjectId(null);
+      dispatch(getAllFrames(newFrames));
+    } catch (error) {
+      console.error('Error creating Frame', error);
+    }
   };
 
-  const handleAddProjectAndClearInput = () => {
-    if (input.name === '') return;
-    if (!handleAddProject || !userId) return;
+  const handleDeleteFrame = async ({ id }: Quadro) => {
+    if (!id) return;
+    try {
+      await frameService.deleteFrame(id);
+      const newFrames = await frameService.getAllFrames(userInfo.id);
+      if (!newFrames) return;
 
-    handleAddProject(userId, input.name);
-    input.name = '';
-    setAddInput(false);
+      dispatch(getAllFrames(newFrames));
+    } catch (error) {}
   };
 
-  const handleUpdateFrame = (frameId: number) => {
-    if (input.name === '') return;
-    if (!handleUpdateProject || !frameId) return;
-
-    handleUpdateProject(frameId, input.name);
-    input.name = '';
-    setEditingProjectId(null);
-  };
-
-  const handleDeleteFrame = (frameId: number) => {
-    if (!handleDeleteProject || !frameId) return;
-    handleDeleteProject(frameId);
-  };
-
-  const funcSelectProject = (frameId: number) => {
-    if (!handleSelectProject) return;
-    handleSelectProject(frameId);
-    setOpen(false);
+  const handleSelectFrame = ({ id }: Quadro) => {
+    if (!id) return;
+    dispatch(filterList(id));
+    dispatch(filterFrames(id));
+    setSelectedFrame(id);
   };
 
   return (
@@ -129,7 +137,7 @@ export const Sidebar = ({
               className={`z-20 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
             >
               <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
-                <h1>Quadros</h1>
+                <h1>{userInfo.name}</h1>
                 <button onClick={handleAddButton}>
                   <MoreSvg />
                 </button>
@@ -157,7 +165,7 @@ export const Sidebar = ({
                           <ButtonGreen
                             children="Criar"
                             buttonProps={{
-                              onClick: () => handleAddProjectAndClearInput(),
+                              onClick: () => handleCreateFrame(),
                             }}
                           />
 
@@ -169,81 +177,85 @@ export const Sidebar = ({
                       </animated.div>
                     ),
                 )}
-                {projects?.map((project) => (
-                  <a
-                    key={project.id}
-                    className={`button-hover cursor-pointer p-3 flex gap-3 items-center w-full ${
-                      selectedProject === project.id ? 'bg-gray-800' : ''
-                    }`}
-                    onClick={() => funcSelectProject(project.id)}
-                  >
-                    <div className="flex items-center justify-between w-full px-2">
-                      {editingProjectId === project.id ? (
-                        <div
-                          className="flex justify-center items-center gap-2 w-full"
-                          onClick={useStopPropagation().stopPropagation}
-                        >
-                          <input
-                            value={input.name}
-                            placeholder={project.name}
-                            onChange={handleInput('name')}
-                            type="text"
-                            name="name"
-                            id="name"
-                            className="overflow-hidden
+                {frames &&
+                  frames.length > 0 &&
+                  frames?.map((project: Quadro) => (
+                    <a
+                      key={project.id}
+                      className={`button-hover cursor-pointer p-3 flex gap-3 items-center w-full 
+                      ${selectedFrame === project.id ? 'bg-gray-800' : ''}`}
+                      onClick={() => handleSelectFrame({ id: project.id })}
+                    >
+                      <div className="flex items-center justify-between w-full px-2">
+                        {editingProjectId === project.id ? (
+                          <div
+                            className="flex justify-center items-center gap-2 w-full"
+                            onClick={useStopPropagation().stopPropagation}
+                          >
+                            <input
+                              value={input.name}
+                              placeholder={project.name}
+                              onChange={handleInput('name')}
+                              type="text"
+                              name="name"
+                              id="name"
+                              className="overflow-hidden
                              resize-none text-sm rounded-lg outline-none p-2 
                            bg-BlackTheme-list drop-shadow-lg text-gray-400
                              border border-gray-400 w-full"
-                          />
-                          <div className="flex gap-2">
-                            <ButtonGreen
-                              children="V"
-                              buttonProps={{
-                                onClick: () => handleUpdateFrame(project.id),
-                              }}
                             />
-                            <ButtonRed
-                              children="X"
-                              buttonProps={{
-                                onClick: () => setEditingProjectId(null),
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <p>{project.name}</p>
-                      )}
-                      {!editingProjectId && (
-                        <DropDownButton
-                          props={{
-                            onClick: useStopPropagation().stopPropagation,
-                          }}
-                          textName="..."
-                        >
-                          <ul
-                            className="text-sm flex flex-col gap-2"
-                            aria-labelledby="dropdownDefaultButton"
-                          >
-                            <li
-                              onClick={() => handleAddInput(project.id)}
-                              className="cursor-pointer button-hover p-2 text-center"
-                            >
-                              Editar
-                            </li>
-                            <li className="cursor-pointer button-hover p-2">
-                              <ModalComponent
-                                title="Excluir"
-                                funcConfirm={() =>
-                                  handleDeleteFrame(project.id)
-                                }
+                            <div className="flex gap-2">
+                              <ButtonGreen
+                                children="V"
+                                buttonProps={{
+                                  onClick: () =>
+                                    handleUpdateFrame({ id: project.id }),
+                                }}
                               />
-                            </li>
-                          </ul>
-                        </DropDownButton>
-                      )}
-                    </div>
-                  </a>
-                ))}
+                              <ButtonRed
+                                children="X"
+                                buttonProps={{
+                                  onClick: () => setEditingProjectId(null),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <p>{project.name}</p>
+                        )}
+                        {!editingProjectId && (
+                          <DropDownButton
+                            props={{
+                              onClick: useStopPropagation().stopPropagation,
+                            }}
+                            textName="..."
+                          >
+                            <ul
+                              className="text-sm flex flex-col gap-2"
+                              aria-labelledby="dropdownDefaultButton"
+                            >
+                              <li
+                                onClick={() =>
+                                  handleAddInput({ id: project.id })
+                                }
+                                className="cursor-pointer button-hover p-2 text-center"
+                              >
+                                Editar
+                              </li>
+                              <li className="cursor-pointer button-hover p-2">
+                                <ModalComponent
+                                  title="Excluir"
+                                  funcConfirm={() =>
+                                    handleDeleteFrame({ id: project.id })
+                                  }
+                                />
+                              </li>
+                            </ul>
+                          </DropDownButton>
+                        )}
+                      </div>
+                    </a>
+                  ))}
               </div>
             </animated.div>
           ),

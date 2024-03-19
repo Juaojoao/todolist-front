@@ -1,16 +1,16 @@
 interface User {
-  id: number;
-  email: string;
-  name: string;
-  password: string;
+  id?: number;
+  email?: string;
+  name?: string;
+  password?: string;
   image?: string;
   quadros?: Quadro[];
   tasksContainers?: TasksContainer[];
 }
 
 interface Quadro {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
   activitiesList?: List[];
   userId?: number;
 }

@@ -1,35 +1,54 @@
-import { ListContextType } from '../../context/ListContext';
 import { List } from '../../interfaces/todo-list.interface';
+import {
+  getAuthorizationToken,
+  getTokenFromLocalStorage,
+} from '../../util/connections/auth';
+import { connectionAPI } from './api';
 
-export const ListService = (listContext: ListContextType) => {
-  const { getLists, createList, deleteList, updateList } = listContext;
+export class ListService {
+  private api = connectionAPI;
+  private token = getTokenFromLocalStorage();
 
-  const onGetlist = async () => {
-    return await getLists();
-  };
+  async getAllList(userId?: number) {
+    if (!userId || !this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      return (await this.api.get<List[]>(`/activitieslist/get/${userId}`)).data;
+    } catch (error) {
+      console.error('Error getting List', error);
+      return null;
+    }
+  }
 
-  const onCreateList = async (name: string, frameId?: number) => {
-    if (!name || !frameId) return;
-    await createList(name, frameId);
-    return await getLists();
-  };
+  async createList(name: string, frameId: number) {
+    if (!name || !frameId || !this.token) return;
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.post('/activitieslist/create', { name, frameId });
+    } catch (error) {
+      console.error('Error creating List', error);
+    }
+  }
 
-  const onUpdateList = async (listId: number, data: List) => {
-    if (!listId || !data) return;
-    await updateList(listId, data);
-    return await getLists();
-  };
+  async deleteList(id: number) {
+    if (!id || !this.token) return;
 
-  const onDeleteList = async (listId: number, frameId: number) => {
-    if (!listId || !frameId) return;
-    await deleteList(listId, frameId);
-    return await getLists();
-  };
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.delete(`/activitieslist/delete/${id}`);
+    } catch (error) {
+      console.error('Error deleting List', error);
+    }
+  }
 
-  return {
-    onGetlist,
-    onCreateList,
-    onUpdateList,
-    onDeleteList,
-  };
-};
+  async updateList(id: number, name: string) {
+    if (!id || !name || !this.token) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.put(`/activitieslist/update/${id}`, { name });
+    } catch (error) {
+      console.error('Error updating List', error);
+    }
+  }
+}

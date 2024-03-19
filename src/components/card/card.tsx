@@ -15,6 +15,7 @@ type CardTodoProps = {
   card: Card;
   updateCard?: (cardId: number, name: string) => void;
   deleteCard?: (cardId: number) => void;
+  seletedCard?: (cardId: number) => void;
 };
 
 const formatDate = (date: string) => {
@@ -67,14 +68,14 @@ export const CardTodo = ({ card, updateCard, deleteCard }: CardTodoProps) => {
     deleteCard(cardId);
   };
 
-  const handleCardSelect = () => {
-    console.log(card.id);
-  };
+  // const handleCardSelect = () => {
+  //   console.log(card.id);
+  // };
 
   return (
     <div
       key={card.id}
-      onClick={handleCardSelect}
+      // onClick={handleCardSelect}
       className="card-todo cursor-pointer w-full h-44 bg-BlackTheme-card p-5 rounded-xl drop-shadow-lg"
     >
       <div className="card-desc flex justify-between items-center">
