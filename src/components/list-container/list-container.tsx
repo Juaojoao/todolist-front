@@ -12,6 +12,8 @@ import { ListService } from '../../services/api/listService';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
 import { filterList, getAllList } from '../../services/redux/list/actions';
+import { CardService } from '../../services/api/cardService';
+import { getAllCards } from '../../services/redux/card/actions';
 
 type ContainerCardProps = {
   cards: Card[];
@@ -27,6 +29,8 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
 
   const listService = new ListService();
+  const cardService = new CardService();
+
   const dispatch = useDispatch();
   const selectedFrame: number = frameInfo.selectedFrame;
 
@@ -45,7 +49,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const handleaddInputEdit = () => setAddInputEdit(!addInputEdit);
   const handleAddInput = () => setAddInput(!addInput);
 
-  const handleEditList = async ({ id }: List) => {
+  const handleUpdateList = async ({ id }: List) => {
     if (!id || input.updateListName === '') return;
 
     try {
@@ -79,23 +83,25 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
     }
   };
 
-  // const handleAddCard = async () => {
-  //   if (input.createCard === '' || !ActivityListId || !createCard) return;
-  //   createCard(input.createCard, ActivityListId);
-  //   input.createCard = '';
-  //   setAddInput(false);
-  // };
+  const handleCreateCard = async ({ activitiesListId }: Card) => {
+    if (!activitiesListId) return;
 
-  // const handleEditCard = (cardId: number, name: string) => {
-  //   if (!updateCard || !name) return;
+    try {
+      await cardService.createCard({
+        activitiesListId: activitiesListId,
+        name: input.createCard,
+      });
+      input.createCard = '';
+      setAddInput(false);
 
-  //   updateCard(cardId, { name: name, activitiesListId: ActivityListId });
-  // };
+      const newCards = await cardService.getAllCard(userInfo.id);
+      if (!newCards) return;
 
-  // const handleDeleteCard = (cardId: number) => {
-  //   if (!deleteCard || !ActivityListId) return;
-  //   deleteCard(cardId, ActivityListId);
-  // };
+      dispatch(getAllCards(newCards));
+    } catch (error) {
+      console.error('Error deleting List', error);
+    }
+  };
 
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
@@ -150,7 +156,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
                 <ButtonGreen
                   children="Salvar"
                   buttonProps={{
-                    onClick: () => handleEditList({ id: list.id }),
+                    onClick: () => handleUpdateList({ id: list.id }),
                   }}
                 />
                 <ButtonRed
@@ -192,7 +198,10 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
             <div className="flex gap-2 mt-2">
               <ButtonGreen
                 children="Criar cartão"
-                // buttonProps={{ onClick: handleAddCard }}
+                buttonProps={{
+                  onClick: () =>
+                    handleCreateCard({ activitiesListId: list.id }),
+                }}
               />
               <ButtonRed
                 children="X"

@@ -19,4 +19,41 @@ export class CardService {
       return null;
     }
   }
+
+  async createCard({ activitiesListId, name, description }: Card) {
+    if (!this.token || !activitiesListId || name === '') return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.post('/card/create', {
+        activitiesListId,
+        name,
+        description,
+      });
+    } catch (error) {
+      console.error('Error creating Card', error);
+    }
+  }
+
+  async updateCard({ id, name, description }: Card) {
+    if (!this.token || name === '' || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.patch(`/card/update/${id}`, { id, name, description });
+    } catch (error) {
+      console.error('Error updating Card', error);
+    }
+  }
+
+  async deleteCard(id: number) {
+    if (!this.token || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.delete(`/card/delete/${id}`);
+    } catch (error) {
+      console.error('Error deleting Card', error);
+    }
+  }
 }
