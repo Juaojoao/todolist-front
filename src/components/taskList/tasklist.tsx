@@ -30,8 +30,9 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
     }));
   };
 
-  const userInfo = useSelector((state: RootState) => state.UserReducer);
   useClickOutside({ ref: ref, callback: () => setAddButtonStates({}) });
+
+  const userInfo = useSelector((state: RootState) => state.UserReducer);
   const { input, handleInput } = useChangeInput({ createTask: '' });
   const stopPropagation = useStopPropagation().stopPropagation;
   const taskListService = new TaskListService();
@@ -39,9 +40,6 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
 
   const handleCreateTask = async ({ taskListId }: Tasks) => {
     if (input.createTask === '' || !taskListId) return;
-
-    console.log('taskListId', taskListId);
-    console.log('input.createTask', input.createTask);
 
     await taskListService.createTask({
       name: input.createTask,
@@ -82,47 +80,50 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
               <label>{tasksFilter.name}:</label>
             </div>
             <ul className="pl-3 mb-5">
-              {tasksFilter.tasks
-                .filter((tasks) => tasks.taskListId === tasksFilter.id)
-                .map((task) => (
-                  <li key={task.id} className="pl-2 flex flex-col text-sm">
-                    <div className="info-task-list flex items-center">
-                      <label
-                        className="relative flex items-center p-3 rounded-full cursor-pointer"
-                        htmlFor={task.name}
-                      >
-                        <CheckBoxCustom
-                          id={task.name}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleTaskStatus({
-                              id: task.id,
-                              status: e.target.checked,
-                            })
-                          }
-                        />
-                        <span
-                          className="absolute text-white transition-opacity opacity-0 pointer-events-none 
-                            top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100"
+              {tasksFilter.tasks &&
+                tasksFilter.tasks
+                  .filter((tasks) => tasks.taskListId === tasksFilter.id)
+                  .map((task) => (
+                    <li key={task.id} className="pl-2 flex flex-col text-sm">
+                      <div className="info-task-list flex items-center">
+                        <label
+                          className="relative flex items-center p-3 rounded-full cursor-pointer"
+                          htmlFor={task.name}
                         >
-                          <CheckedSvg />
-                        </span>
-                      </label>
-                      <label
-                        className="mt-px font-light text-gray-700 cursor-pointer select-none w-full hover:bg-gray-800 
+                          <CheckBoxCustom
+                            id={task.name}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>,
+                            ) =>
+                              handleTaskStatus({
+                                id: task.id,
+                                status: e.target.checked,
+                              })
+                            }
+                          />
+                          <span
+                            className="absolute text-white transition-opacity opacity-0 pointer-events-none 
+                            top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100"
+                          >
+                            <CheckedSvg />
+                          </span>
+                        </label>
+                        <label
+                          className="mt-px font-light text-gray-700 cursor-pointer select-none w-full hover:bg-gray-800 
                           p-2 rounded-md transition-all duration-150 hover:text-gray-400"
-                        htmlFor={task.name}
-                      >
-                        {task.status ? (
-                          <span className="line-through">{task.name}</span>
-                        ) : (
-                          <span>{task.name}</span>
-                        )}
-                      </label>
-                    </div>
-                  </li>
-                ))}
+                          htmlFor={task.name}
+                        >
+                          {task.status ? (
+                            <span className="line-through">{task.name}</span>
+                          ) : (
+                            <span>{task.name}</span>
+                          )}
+                        </label>
+                      </div>
+                    </li>
+                  ))}
               <div className="ml-4">
-                {addButtonStates[tasksFilter.id] ? (
+                {tasksFilter.id && addButtonStates[tasksFilter.id] ? (
                   <div
                     className="flex gap-2"
                     onClick={stopPropagation}
@@ -148,14 +149,18 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                       <ButtonRed
                         children="X"
                         buttonProps={{
-                          onClick: () => handleClickAddButton(tasksFilter.id),
+                          onClick: () =>
+                            tasksFilter.id &&
+                            handleClickAddButton(tasksFilter.id),
                         }}
                       />
                     </div>
                   </div>
                 ) : (
                   <button
-                    onClick={() => handleClickAddButton(tasksFilter.id)}
+                    onClick={() =>
+                      tasksFilter.id && handleClickAddButton(tasksFilter.id)
+                    }
                     className="text-sm bg-BlackTheme-roudend p-1 rounded-md hover:text-green-700
                   transition-all duration-150 border-2 border-gray-700 hover:border-green-700"
                   >

@@ -1,4 +1,4 @@
-import { Tasks } from '../../interfaces/todo-list.interface';
+import { Tasks, taskList } from '../../interfaces/todo-list.interface';
 import {
   getAuthorizationToken,
   getTokenFromLocalStorage,
@@ -18,6 +18,17 @@ export class TaskListService {
       return (await this.api.get(`tasklist/get/${userId}`)).data;
     } catch (error) {
       console.error('Error getting TaskList', error);
+    }
+  }
+
+  async createTaskList({ cardId, name }: taskList) {
+    if (!this.token || !cardId || name === '') return;
+
+    try {
+      getAuthorizationToken(this.token);
+      return await this.api.post('tasklist/create', { cardId, name });
+    } catch (error) {
+      console.error('Error creating TaskList', error);
     }
   }
 

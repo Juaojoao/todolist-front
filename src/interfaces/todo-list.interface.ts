@@ -31,10 +31,10 @@ interface Card {
 }
 
 interface taskList {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
   cardId?: number;
-  tasks: Tasks[];
+  tasks?: Tasks[];
 }
 
 interface Tasks {
