@@ -5,7 +5,6 @@ interface User {
   password?: string;
   image?: string;
   quadros?: Quadro[];
-  tasksContainers?: TasksContainer[];
 }
 
 interface Quadro {
@@ -27,22 +26,22 @@ interface Card {
   name?: string;
   description?: string;
   createdAt?: string;
-  tasklist?: Task[];
+  tasklist?: taskList[];
   activitiesListId?: number;
 }
 
-interface Task {
+interface taskList {
   id: number;
   name: string;
-  status: boolean;
   cardId?: number;
+  tasks: Tasks[];
 }
 
-interface TasksContainer {
-  id: number;
-  name: string;
-  tasks?: Task[];
-  owner?: number;
+interface Tasks {
+  id?: number;
+  name?: string;
+  status?: boolean;
+  taskListId?: number;
 }
 
-export type { User, Quadro, List, Card, Task, TasksContainer };
+export type { User, Quadro, List, Card, Tasks, taskList };

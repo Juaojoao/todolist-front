@@ -8,7 +8,10 @@ import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
-import { getAllCards, selectedCard } from '../../services/redux/card/actions';
+import {
+  getAllCards,
+  setSelectedCard,
+} from '../../services/redux/card/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
 import { CardService } from '../../services/api/cardService';
@@ -23,6 +26,7 @@ export const CardTodo = ({ card }: CardTodoProps) => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
 
   const [addInputEdit, setAddInputEdit] = useState(false);
+
   const completedTasks = card.tasklist?.map(
     (taskList) => taskList.status === true,
   ).length;
@@ -82,14 +86,13 @@ export const CardTodo = ({ card }: CardTodoProps) => {
 
   const handleCardSelect = () => {
     if (!card.id) return;
-
-    dispatch(selectedCard(card.id));
+    dispatch(setSelectedCard(card));
   };
 
   return (
     <div
       key={card.id}
-      onClick={handleCardSelect}
+      onClick={() => handleCardSelect()}
       className="card-todo cursor-pointer w-full h-44 bg-BlackTheme-card 
       p-5 rounded-xl drop-shadow-md hover:drop-shadow-2xl hover:-translate-y-2 transition-all 
       duration-300"
