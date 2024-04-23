@@ -7,7 +7,7 @@ export const useChangeInput = <T extends Record<string, any>>(
 
   const handleInput =
     <K extends keyof T>(field: K) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setInput({ ...input, [field]: e.target.value });
     };
 

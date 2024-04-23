@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, taskList } from '../../interfaces/todo-list.interface';
-import { ExitIcon } from '../svg/exit';
 import { TrelloSvg } from '../svg/trello';
 import { unsetSelectedCard } from '../../services/redux/card/actions';
 import { DescriptionSvg } from '../svg/description';
@@ -14,6 +13,8 @@ import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { TaskListService } from '../../services/api/taskListService';
 import { getAllTaskList } from '../../services/redux/tasList/actions';
+import { XisSvg } from '../svg/xis';
+import { EditSvg } from '../svg/edit';
 
 interface modalProps {
   card: Card;
@@ -25,11 +26,22 @@ export const ModalContext = ({ card }: modalProps) => {
   const ref = useRef(null);
 
   const [addButtonStates, setAddButtonStates] = useState<Boolean>(false);
+  const [addButtonEdit, setAddButtonEdit] = useState<Boolean>(false);
   const userInfo = useSelector((state: RootState) => state.UserReducer);
   const handleClickAddButton = () => setAddButtonStates(!addButtonStates);
-  const { input, handleInput } = useChangeInput({ createTaskList: '' });
+  const handleClickEditButton = () => setAddButtonEdit(!addButtonEdit);
+  const { input, handleInput } = useChangeInput({
+    createTaskList: '',
+    editDescription: '',
+  });
 
-  useClickOutside({ ref: ref, callback: () => handleClickAddButton() });
+  useClickOutside({
+    ref: ref,
+    callback: () => {
+      setAddButtonStates(false);
+      setAddButtonEdit(false);
+    },
+  });
 
   const taskListInfo: taskList[] = useSelector(
     (state: RootState) => state.TaskListReducer.taskList,
@@ -54,31 +66,78 @@ export const ModalContext = ({ card }: modalProps) => {
     <section className="w-screen">
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center py-10">
         <div className="bg-BlackTheme-aside w-2/4 p-4 rounded-lg relative shadow-lg flex flex-col h-full overflow-y-auto gap-10">
-          <div className="show-card-header flex text-gray-800 gap-2 items-center">
-            <TrelloSvg />
-            <h3 className="text-xl text-gray-600 font-bold font-sans">
-              {card.name}
-            </h3>
+          <div className="show-card-header flex text-gray-800 gap-2 items-center justify-between">
+            <div className="flex text-gray-800 gap-2 items-center">
+              <TrelloSvg />
+              <h3 className="text-xl text-gray-600 font-bold font-sans">
+                {card.name}
+              </h3>
+            </div>
             <button
-              className="text-red-500 absolute right-2 top-1"
+              className="text-gray-600 text-3xl hover:bg-gray-800 rounded-full transition duration-500 p-2"
               onClick={() => dispatch(unsetSelectedCard())}
             >
-              <ExitIcon />
+              <XisSvg />
             </button>
           </div>
           <div className="description">
-            <div className="flex gap-2 items-center">
-              <DescriptionSvg />
-              <span className="text-sm text-gray-600 font-bold font-sans">
-                Descrição:
-              </span>
+            <div
+              className={`flex gap-2 ${addButtonEdit ? 'flex-col' : 'items-center'}`}
+            >
+              <div className="flex items-center gap-2">
+                <DescriptionSvg />
+                <span className="text-sm text-gray-600 font-bold font-sans">
+                  Descrição:
+                </span>
+              </div>
+              {addButtonEdit ? (
+                <div
+                  className="flex flex-col gap-2"
+                  onClick={useStopPropagation().stopPropagation}
+                  ref={ref}
+                >
+                  <div className="w-full ">
+                    <textarea
+                      onChange={handleInput('editDescription')}
+                      name="editTask"
+                      id="editTask"
+                      value={
+                        input.editDescription
+                          ? input.editDescription
+                          : card.description
+                      }
+                      className="overflow-hidden resize-none text-sm drop-shadow-2xl py-4 h-auto w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 justify-end">
+                    <ButtonGreen children="V" />
+                    <ButtonRed
+                      children="X"
+                      buttonProps={{
+                        onClick: () => setAddButtonEdit(false),
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between">
+                  {!addButtonEdit && (
+                    <>
+                      <p className="text-sm">{card?.description}</p>
+                      <button onClick={() => handleClickEditButton()}>
+                        <EditSvg />
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="text-sm">{card?.description}</p>
           </div>
 
           <div className="task-list text-gray-600 font-bold font-sans flex flex-col gap-2">
-            <div className="task-list-header flex justify-between items-center">
-              <span className="text-sm  ">Tarefas:</span>
+            <div className="task-list-header flex justify-between items-center mb-4">
+              <span className="text-sm ">Tarefas:</span>
               {addButtonStates ? (
                 <div
                   className="flex gap-2"
@@ -104,7 +163,7 @@ export const ModalContext = ({ card }: modalProps) => {
                     <ButtonRed
                       children="X"
                       buttonProps={{
-                        onClick: () => setAddButtonStates(!addButtonStates),
+                        onClick: () => setAddButtonStates(false),
                       }}
                     />
                   </div>

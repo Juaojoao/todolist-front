@@ -22,4 +22,13 @@ export class UserService {
       return null;
     }
   }
+
+  async createUser({ email, name, password }: User) {
+    try {
+      console.log(email, name, password);
+      await this.api.post('user/create', { email, name, password });
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
+  }
 }

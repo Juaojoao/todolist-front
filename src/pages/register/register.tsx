@@ -17,6 +17,7 @@ import {
   initialRegisterError,
   validateRegisterInputs,
 } from '../../util/functions/validateRegister';
+import { UserService } from '../../services/api/userService';
 // import { useUser } from "../../context/UserContext";
 
 interface FormState {
@@ -27,7 +28,7 @@ interface FormState {
 }
 
 export const RegisterPage = () => {
-  // const { createUser } = useUser();
+  const userService = new UserService();
 
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
   const initialFormState: FormState = {
@@ -55,9 +56,17 @@ export const RegisterPage = () => {
     }
 
     try {
-      // await createUser(input.name, input.email, input.password);
+      await userService.createUser({
+        name: input.name,
+        email: input.email,
+        password: input.password,
+      });
       setIsSubmit(true);
       setIsLoad(false);
+      input.name = '';
+      input.email = '';
+      input.password = '';
+      input.confirmPassword = '';
     } catch (error) {
       console.log(error);
       setIsLoad(false);

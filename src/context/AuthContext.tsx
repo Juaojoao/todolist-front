@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { connectionAPI } from '../services/api/api';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 type AuthContextType = {
   token: string | null;
@@ -22,6 +23,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+
+    if (token) {
+      const decodedToken = jwtDecode(token);
+
+      if (
+        decodedToken &&
+        decodedToken.exp &&
+        decodedToken.exp < Date.now() / 1000
+      ) {
+        logout();
+      } else {
+        connectionAPI.defaults.headers['Authorization'] = `Bearer ${token}`;
+        setToken(token);
+        navigate('/dashboard');
+      }
+    }
+
     const interceptor = connectionAPI.interceptors.response.use(
       (response) => response,
       (error) => {
@@ -32,14 +50,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       },
     );
 
-    return () => {
-      if (token) {
-        connectionAPI.defaults.headers['Authorization'] = `Bearer ${token}`;
-        setToken(token);
-        navigate('/dashboard');
-      }
-      connectionAPI.interceptors.response.eject(interceptor);
-    };
+    return () => connectionAPI.interceptors.response.eject(interceptor);
   }, [navigate]);
 
   const getAuhToken = () => localStorage.getItem('token');
