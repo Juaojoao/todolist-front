@@ -19,6 +19,7 @@ const CardReducer = (state = initialState, action: ActionRedux) => {
         ...state,
         selectedCard: action.payload,
       };
+
     case cardActionTypes.UNSET_SELECTED_CARD:
       return {
         ...state,

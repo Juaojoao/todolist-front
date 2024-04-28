@@ -32,6 +32,29 @@ export class TaskListService {
     }
   }
 
+  async deleteTaskList(id: number) {
+    if (!this.token || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      return await this.api.delete(`tasklist/delete/${id}`);
+    } catch (error) {
+      console.error('Error deleting TaskList', error);
+    }
+  }
+
+  async updateNameTaskList({ id, name }: taskList) {
+    if (!this.token || !id || name === '') return;
+
+    try {
+      getAuthorizationToken(this.token);
+      const response = await this.api.patch(`tasklist/update/${id}`, { name });
+      return response;
+    } catch (error) {
+      console.error('Error updating TaskList', error);
+    }
+  }
+
   //Task
   async createTask({ name, taskListId }: Tasks) {
     if (!this.token || name === '' || !taskListId) return;

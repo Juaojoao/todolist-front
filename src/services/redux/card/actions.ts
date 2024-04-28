@@ -6,7 +6,7 @@ export const getAllCards = (payload: Card[]) => ({
   payload,
 });
 
-export const setSelectedCard = (payload: Card) => ({
+export const setSelectedCard = (payload: number) => ({
   type: cardActionTypes.SET_SELECTED_CARD,
   payload,
 });

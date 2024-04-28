@@ -1,6 +1,6 @@
 import { ProgressSvg } from '../svg/progress';
 import { Progress } from '@material-tailwind/react';
-import { Card, User } from '../../interfaces/todo-list.interface';
+import { Card, User, taskList } from '../../interfaces/todo-list.interface';
 import { DropDownButton } from '../buttons/dropDown';
 import { ModalComponent } from '../modal/modalAlert';
 import { useRef, useState } from 'react';
@@ -25,16 +25,27 @@ type CardTodoProps = {
 export const CardTodo = ({ card }: CardTodoProps) => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
 
+  const taskListInfoForCard: taskList[] | undefined = card.tasklist;
+
+  let totTask = 0;
+  let completedTasks = 0;
+
+  if (taskListInfoForCard) {
+    totTask = taskListInfoForCard.reduce((acc, curr) => {
+      return acc + (curr.tasks ? curr.tasks.length : 0);
+    }, 0);
+
+    completedTasks = taskListInfoForCard.reduce((acc, curr) => {
+      return (
+        acc + (curr.tasks ? curr.tasks.filter((task) => task.status).length : 0)
+      );
+    }, 0);
+  }
+
   const [addInputEdit, setAddInputEdit] = useState(false);
+  if (completedTasks === undefined || totTask === undefined) return;
 
-  const completedTasks = card.tasklist?.map(
-    (taskList) => taskList.status === true,
-  ).length;
-  const totalTasks = card.tasklist?.length;
-
-  if (completedTasks === undefined || totalTasks === undefined) return;
-
-  const progress = progressBar({ completedTasks, totalTasks });
+  const progress = progressBar({ completedTasks, totalTasks: totTask });
   const progressPercent = progress?.percent;
   const progressBarColor = progress?.color;
   const cardService = new CardService();
@@ -86,7 +97,7 @@ export const CardTodo = ({ card }: CardTodoProps) => {
 
   const handleCardSelect = () => {
     if (!card.id) return;
-    dispatch(setSelectedCard(card));
+    dispatch(setSelectedCard(card.id));
   };
 
   return (
@@ -171,7 +182,7 @@ export const CardTodo = ({ card }: CardTodoProps) => {
             <p className="font-medium text-xs opacity-50">Progresso</p>
           </div>
           <div className="task-progress-task-wrapper">
-            <p className="font-semiboldnt text-sm">{`${completedTasks}/${totalTasks}`}</p>
+            <p className="font-semiboldnt text-sm">{`${completedTasks}/${totTask}`}</p>
           </div>
         </div>
         <div className="task-progress-bar w-full">

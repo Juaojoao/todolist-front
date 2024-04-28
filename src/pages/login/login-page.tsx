@@ -23,16 +23,17 @@ interface FormState {
 
 export const LoginPage = () => {
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
-  const { login, getAuhToken } = useAuth();
+  const { login, getAuhToken, itsTokenExpired, logout } = useAuth();
   const navigate = useNavigate();
+  const token = getAuhToken();
 
   useEffect(() => {
-    const token = getAuhToken();
-
-    if (token) {
-      navigate('/dashboard');
+    if (!token || itsTokenExpired(token)) {
+      logout();
     }
-  }, [navigate, getAuhToken]);
+
+    navigate('/dashboard');
+  }, [token]);
 
   const initialFormState: FormState = {
     email: '',

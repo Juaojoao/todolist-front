@@ -14,6 +14,7 @@ import { RootState } from '../../services/redux/root-reducer';
 import { CheckSvg } from '../svg/check';
 import { ModalAlertSmall } from '../modal/modalAlertSmall';
 import { EditSvg } from '../svg/edit';
+import { TreshSvg } from '../svg/tresh';
 
 interface TaskListProps {
   taskList: taskList[];
@@ -25,7 +26,7 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
     [key: number]: boolean;
   }>({});
 
-  const [addButtonEdit, setAddButtonEdit] = useState<{
+  const [addButtonEditTaskList, setAddButtonEditTaskList] = useState<{
     [key: number]: boolean;
   }>({});
 
@@ -40,7 +41,7 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
   };
 
   const handleClickEditButton = (taskListId: number) => {
-    setAddButtonEdit((prevState) => ({
+    setAddButtonEditTaskList((prevState) => ({
       ...prevState,
       [taskListId]: !prevState[taskListId],
     }));
@@ -49,14 +50,14 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
   useClickOutside({
     ref: ref,
     callback: () => {
-      setAddButtonStates({}), setAddButtonEdit({});
+      setAddButtonStates({}), setAddButtonEditTaskList({});
     },
   });
 
   const userInfo = useSelector((state: RootState) => state.UserReducer);
   const { input, handleInput } = useChangeInput({
     createTask: '',
-    editTask: '',
+    editTaskList: '',
   });
   const stopPropagation = useStopPropagation().stopPropagation;
   const taskListService = new TaskListService();
@@ -85,6 +86,31 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
     dispatch(getAllTaskList(newTasksList));
   };
 
+  const handleDeleteTaskList = async (id?: number) => {
+    if (!id) return;
+
+    await taskListService.deleteTaskList(id);
+    const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
+    dispatch(getAllTaskList(newTasksList));
+  };
+
+  const handleEditTaskList = async (id?: number) => {
+    if (!id || input.editTaskList === '') return;
+
+    const response = await taskListService.updateNameTaskList({
+      id,
+      name: input.editTaskList,
+    });
+
+    if (response?.status === 200) {
+      input.editTaskList = '';
+      setAddButtonEditTaskList({});
+
+      const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
+      dispatch(getAllTaskList(newTasksList));
+    }
+  };
+
   return (
     <div className="task-list-content">
       {taskList
@@ -92,16 +118,20 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
         .map((tasksFilter) => (
           <div key={tasksFilter.id}>
             <div>
-              {tasksFilter.id && addButtonEdit[tasksFilter.id] ? (
+              {tasksFilter.id && addButtonEditTaskList[tasksFilter.id] ? (
                 <div className="flex gap-2" onClick={stopPropagation} ref={ref}>
                   <div className="flex items-center gap-2">
                     <CheckSvg />
                     <input
-                      onChange={handleInput('editTask')}
+                      onChange={handleInput('editTaskList')}
                       type="text"
-                      name="editTask"
-                      id="editTask"
-                      value={input.editTask ? input.editTask : tasksFilter.name}
+                      name="editTaskList"
+                      id="editTaskList"
+                      value={
+                        input.editTaskList
+                          ? input.editTaskList
+                          : tasksFilter.name
+                      }
                       className="overflow-hidden resize-none text-sm rounded-lg outline-none p-1 
                   bg-BlackTheme-list drop-shadow-lg text-gray-400
                     border border-gray-400"
@@ -109,11 +139,17 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                   </div>
 
                   <div className="flex gap-2">
-                    <ButtonGreen children="V" />
+                    <ButtonGreen
+                      children="V"
+                      buttonProps={{
+                        onClick: () => handleEditTaskList(tasksFilter.id),
+                      }}
+                    />
                     <ButtonRed
                       children="X"
                       buttonProps={{
-                        onClick: () => tasksFilter.id && setAddButtonEdit({}),
+                        onClick: () =>
+                          tasksFilter.id && setAddButtonEditTaskList({}),
                       }}
                     />
                   </div>
@@ -135,6 +171,7 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                     <ModalAlertSmall
                       title={tasksFilter.name}
                       show={showModal}
+                      funcConfirm={() => handleDeleteTaskList(tasksFilter?.id)}
                     />
                   </div>
                 </div>
@@ -172,11 +209,21 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                         </label>
                         <label
                           className="mt-px font-light text-gray-700 cursor-pointer select-none w-full hover:bg-gray-800 
-                          p-2 rounded-md transition-all duration-150 hover:text-gray-400"
+                          p-2 rounded-md transition-all duration-150 hover:text-gray-400 flex justify-between"
                         >
-                          <span className={task.status ? 'line-through' : ''}>
-                            {task.name}
-                          </span>
+                          <div>
+                            <span className={task.status ? 'line-through' : ''}>
+                              {task.name}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <button>
+                              <EditSvg />
+                            </button>
+                            <button>
+                              <TreshSvg />
+                            </button>
+                          </div>
                         </label>
                       </div>
                     </li>

@@ -8,6 +8,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   getAuhToken: () => string | null;
+  itsTokenExpired: (token: string) => boolean;
 };
 
 type AuthProviderProps = {
@@ -24,22 +25,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    if (token) {
-      const decodedToken = jwtDecode(token);
-
-      if (
-        decodedToken &&
-        decodedToken.exp &&
-        decodedToken.exp < Date.now() / 1000
-      ) {
-        logout();
-      } else {
-        connectionAPI.defaults.headers['Authorization'] = `Bearer ${token}`;
-        setToken(token);
-        navigate('/dashboard');
-      }
+    if (!token || itsTokenExpired(token)) {
+      logout();
+      navigate('/');
+      return;
     }
-
     const interceptor = connectionAPI.interceptors.response.use(
       (response) => response,
       (error) => {
@@ -54,6 +44,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [navigate]);
 
   const getAuhToken = () => localStorage.getItem('token');
+
+  const itsTokenExpired = (token: string): boolean => {
+    const decodedToken: any = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  };
 
   const login = async (email: string, password: string) => {
     const response = await connectionAPI.post('/auth/login', {
@@ -74,7 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, getAuhToken }}>
+    <AuthContext.Provider value={{ token, login, logout, getAuhToken, itsTokenExpired }}>
       {children}
     </AuthContext.Provider>
   );

@@ -56,4 +56,15 @@ export class CardService {
       console.error('Error deleting Card', error);
     }
   }
+
+  async updateDescription({ id, description }: Card) {
+    if (!this.token || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.post(`/card/updateDesc/${id}`, { description });
+    } catch (error) {
+      console.error('Error updating Card description', error);
+    }
+  }
 }

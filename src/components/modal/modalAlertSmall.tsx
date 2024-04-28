@@ -53,7 +53,7 @@ export const ModalAlertSmall = ({ funcConfirm, title, show }: ModalProps) => {
             <span>Cancel</span>
           </Button>
           <Button variant="gradient" color="green" onClick={handleConfirm}>
-            <span>Confirm</span>
+            <span>Confirmar</span>
           </Button>
         </DialogFooter>
       </Dialog>

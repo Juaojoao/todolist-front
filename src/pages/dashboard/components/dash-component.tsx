@@ -19,7 +19,8 @@ import { TaskListService } from '../../../services/api/taskListService';
 import { getAllTaskList } from '../../../services/redux/tasList/actions';
 
 export const ListTodo = () => {
-  const { token } = useAuth();
+  const { getAuhToken } = useAuth();
+  const token = getAuhToken();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -37,8 +38,7 @@ export const ListTodo = () => {
       const fetchUserInfo = async () => {
         const user = await userService.getInfoUser();
 
-        if (!user) return navigate('/');
-        dispatch(SetUserInfo(user));
+        dispatch(SetUserInfo(user || null));
 
         const frames = await frameService.getAllFrames(user?.id);
         const lists = await listService.getAllList(user?.id);
@@ -64,7 +64,7 @@ export const ListTodo = () => {
       <div className="project-box p-4 w-full flex flex-col overflow-x-hidden">
         <HeaderTodo />
         <div className="overflow-hidden h-full relative">
-          {selectedCard && <ModalContext card={selectedCard} />}
+          {selectedCard && <ModalContext cardSelected={selectedCard} />}
           <BodyContainer />
         </div>
       </div>
