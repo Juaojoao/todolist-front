@@ -19,6 +19,7 @@ import { getAllTaskList } from '../../services/redux/tasList/actions';
 import { XisSvg } from '../svg/xis';
 import { EditSvg } from '../svg/edit';
 import { CardService } from '../../services/api/cardService';
+import { MoreSvg } from '../svg/more';
 
 interface modalProps {
   cardSelected: number;
@@ -208,10 +209,11 @@ export const ModalContext = ({ cardSelected }: modalProps) => {
               ) : (
                 <button
                   onClick={handleClickAddButton}
-                  className="text-sm bg-BlackTheme-roudend p-1 rounded-md hover:text-green-700
-                  transition-all duration-150 border-2 border-gray-700 hover:border-green-700"
+                  className="text-smp-1 rounded-md hover:text-green-700
+                  transition-all duration-150  hover:border-green-700 flex items-center gap-2"
                 >
-                  ADICIONAR NOVA LISTA
+                  <MoreSvg />
+                  NOVA LISTA
                 </button>
               )}
             </div>

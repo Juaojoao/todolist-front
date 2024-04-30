@@ -18,6 +18,8 @@ import { RootState } from '../../services/redux/root-reducer';
 import { FrameService } from '../../services/api/frameService';
 import { filterFrames, getAllFrames } from '../../services/redux/frame/actions';
 import { filterList } from '../../services/redux/list/actions';
+import { EditSvg } from '../svg/edit';
+import { TreshSvg } from '../svg/tresh';
 
 export const Sidebar = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
@@ -230,27 +232,17 @@ export const Sidebar = () => {
                             }}
                             textName="..."
                           >
-                            <ul
-                              className="text-sm flex flex-col gap-2"
-                              aria-labelledby="dropdownDefaultButton"
+                            <button
+                              onClick={() => handleAddInput({ id: project.id })}
                             >
-                              <li
-                                onClick={() =>
-                                  handleAddInput({ id: project.id })
-                                }
-                                className="cursor-pointer button-hover p-2 text-center"
-                              >
-                                Editar
-                              </li>
-                              <li className="cursor-pointer button-hover p-2">
-                                <ModalComponent
-                                  title="Excluir"
-                                  funcConfirm={() =>
-                                    handleDeleteFrame({ id: project.id })
-                                  }
-                                />
-                              </li>
-                            </ul>
+                              <EditSvg />
+                            </button>
+                            <ModalComponent
+                              title={<TreshSvg />}
+                              funcConfirm={() =>
+                                handleDeleteFrame({ id: project.id })
+                              }
+                            />
                           </DropDownButton>
                         )}
                       </div>

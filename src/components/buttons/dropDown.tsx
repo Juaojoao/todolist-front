@@ -1,6 +1,7 @@
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useRef, useState } from 'react';
 import './style.css';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 
 type DropDownButtonProps = {
   textName: string;
@@ -23,7 +24,12 @@ export const DropDownButton = ({
   };
 
   return (
-    <div className="relative" {...props} ref={dropDownRef}>
+    <div
+      className="relative"
+      onClick={useStopPropagation().stopPropagation}
+      {...props}
+      ref={dropDownRef}
+    >
       <div
         id="dropdownDefaultButton"
         onClick={toggleDropDown}
@@ -35,8 +41,7 @@ export const DropDownButton = ({
       </div>
       <div
         id="dropdown"
-        className={`dropdown-content ${isOpen ? 'visible opacity-100' : 'invisible opacity-0'} ease-in-out transition-all duration-300 
-        drop-shadow-lg z-10 p-2 bg-gray-800 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 absolute top-10 right-0`}
+        className={`dropdown-content bg-BlackTheme-list rounded-lg border border-gray-600 drop-shadow-md ${isOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}
       >
         {children}
       </div>

@@ -7,13 +7,18 @@ import {
   DialogFooter,
 } from '@material-tailwind/react';
 
-type ModalProps = {
-  title: string;
+interface ModalProps extends React.HTMLAttributes<HTMLButtonElement> {
+  title: any;
   dialog?: string;
   funcConfirm?: () => void;
-};
+}
 
-export const ModalComponent = ({ title, funcConfirm, dialog }: ModalProps) => {
+export const ModalComponent = ({
+  title,
+  funcConfirm,
+  dialog,
+  ...props
+}: ModalProps) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(!open);
 
@@ -24,7 +29,11 @@ export const ModalComponent = ({ title, funcConfirm, dialog }: ModalProps) => {
 
   return (
     <>
-      <button className="w-full" onClick={handleOpen}>
+      <button
+        {...props}
+        className="w-full outline-none border-none"
+        onClick={handleOpen}
+      >
         {title}
       </button>
       <Dialog open={open} handler={handleOpen} className="bg-BlackTheme-card ">

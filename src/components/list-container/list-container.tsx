@@ -14,6 +14,9 @@ import { RootState } from '../../services/redux/root-reducer';
 import { filterList, getAllList } from '../../services/redux/list/actions';
 import { CardService } from '../../services/api/cardService';
 import { getAllCards } from '../../services/redux/card/actions';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
+import { EditSvg } from '../svg/edit';
+import { TreshSvg } from '../svg/tresh';
 
 type ContainerCardProps = {
   cards: Card[];
@@ -31,8 +34,8 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const listService = new ListService();
   const cardService = new CardService();
 
-  const dispatch = useDispatch();
   const selectedFrame: number = frameInfo.selectedFrame;
+  const dispatch = useDispatch();
 
   const { input, handleInput } = useChangeInput({
     createCard: '',
@@ -119,23 +122,13 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
               </p>
 
               <DropDownButton textName="...">
-                <ul
-                  className="text-sm flex flex-col gap-2"
-                  aria-labelledby="dropdownDefaultButton"
-                >
-                  <li
-                    className="cursor-pointer button-hover p-2 w-full text-center"
-                    onClick={handleaddInputEdit}
-                  >
-                    Editar
-                  </li>
-                  <li className="cursor-pointer button-hover p-2">
-                    <ModalComponent
-                      title="Excluir"
-                      funcConfirm={() => handleDeleteList({ id: list.id })}
-                    />
-                  </li>
-                </ul>
+                <button onClick={handleaddInputEdit}>
+                  <EditSvg />
+                </button>
+                <ModalComponent
+                  title={<TreshSvg />}
+                  funcConfirm={() => handleDeleteList({ id: list.id })}
+                />
               </DropDownButton>
             </>
           ) : (
@@ -151,6 +144,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
                 placeholder="Editar"
                 className="overflow-hidden resize-none text-sm drop-shadow-2xl py-2
                  w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
+                onClick={useStopPropagation().stopPropagation}
               />
               <div className="flex gap-2">
                 <ButtonGreen

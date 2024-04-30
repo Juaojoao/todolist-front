@@ -17,6 +17,9 @@ import { RootState } from '../../services/redux/root-reducer';
 import { CardService } from '../../services/api/cardService';
 import { formatDate } from '../../util/functions/formatDate';
 import { progressBar } from '../../util/functions/progressBar';
+import { EditSvg } from '../svg/edit';
+import { TreshSvg } from '../svg/tresh';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 
 type CardTodoProps = {
   card: Card;
@@ -125,30 +128,20 @@ export const CardTodo = ({ card }: CardTodoProps) => {
               </p>
             </div>
             <DropDownButton textName="...">
-              <ul
-                className="text-sm flex flex-col gap-2"
-                aria-labelledby="dropdownDefaultButton"
-              >
-                <li
-                  className="cursor-pointer button-hover p-2 w-full text-center"
-                  onClick={handleaddInputEdit}
-                >
-                  Editar
-                </li>
-                <li className="cursor-pointer button-hover p-2">
-                  <ModalComponent
-                    dialog={`Você tem certeza que deseja excluir o cartão "${card.name}"?`}
-                    title="Excluir"
-                    funcConfirm={handleDeleteCard}
-                  />
-                </li>
-              </ul>
+              <button onClick={handleaddInputEdit}>
+                <EditSvg />
+              </button>
+              <ModalComponent
+                title={<TreshSvg />}
+                funcConfirm={handleDeleteCard}
+              />
             </DropDownButton>
           </>
         ) : (
           <div
             className="flex gap-2 items-center justify-center"
             ref={refInput}
+            onClick={useStopPropagation().stopPropagation}
           >
             <input
               type="text"

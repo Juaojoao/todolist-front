@@ -2,26 +2,14 @@ export const MoreSvg = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="28"
-      height="28"
-      viewBox="0 0 28 28"
-      fill="none"
+      viewBox="0 0 512 512"
+      className="w-6 rounded-full bg-gray-600 p-1 fill-gray-300 opacity-50 cursor-pointer hover:opacity-100 transition duration-500"
     >
-      <circle cx="14" cy="14" r="14" fill="white" fillOpacity="0.08" />
-      <g opacity="0.4">
-        <path
-          d="M18 14L10 14"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M14 18L14 10"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </g>
+      <path
+        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 
+        0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 
+        32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+      />
     </svg>
   );
 };
