@@ -13,7 +13,7 @@ import { HeaderTodo } from '../../../components/header/header';
 import { BodyContainer } from '../../../components/list-container/body-container';
 import { CardService } from '../../../services/api/cardService';
 import { getAllCards } from '../../../services/redux/card/actions';
-import { ModalContext } from '../../../components/modal/modalContent';
+import { ModalCardComp } from '../../../components/modal/modalContent';
 import { RootState } from '../../../services/redux/root-reducer';
 import { TaskListService } from '../../../services/api/taskListService';
 import { getAllTaskList } from '../../../services/redux/tasList/actions';
@@ -64,7 +64,7 @@ export const ListTodo = () => {
       <div className="project-box p-4 w-full flex flex-col overflow-x-hidden">
         <HeaderTodo />
         <div className="overflow-hidden h-full relative">
-          {selectedCard && <ModalContext cardSelected={selectedCard} />}
+          {selectedCard && <ModalCardComp cardSelected={selectedCard} />}
           <BodyContainer />
         </div>
       </div>

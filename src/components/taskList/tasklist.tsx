@@ -15,6 +15,8 @@ import { TaskComp } from './task';
 import { InputConditionComp } from '../inputs/inputCondition';
 import { ModalComponent } from '../modal/modalAlert';
 import { TreshSvg } from '../svg/tresh';
+import { handleAddButton } from '../../util/functions/handleAddInput';
+import { MoreSvg } from '../svg/more';
 
 interface TaskListProps {
   taskList: taskList[];
@@ -32,21 +34,6 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
 
   const ref = useRef(null);
 
-  const handleClickAddButton = (taskListId?: number) => {
-    if (!taskListId) return;
-    setAddButtonStates((prevState) => ({
-      ...prevState,
-      [taskListId]: !prevState[taskListId],
-    }));
-  };
-
-  const handleClickEditButton = (taskListId: number) => {
-    setAddButtonEditTaskList((prevState) => ({
-      ...prevState,
-      [taskListId]: !prevState[taskListId],
-    }));
-  };
-
   useClickOutside({
     ref: ref,
     callback: () => {
@@ -54,11 +41,12 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
     },
   });
 
-  const userInfo = useSelector((state: RootState) => state.UserReducer);
   const { input, handleInput } = useChangeInput({
     editTaskList: '',
     createTask: '',
   });
+
+  const userInfo = useSelector((state: RootState) => state.UserReducer);
   const stopPropagation = useStopPropagation().stopPropagation;
   const taskListService = new TaskListService();
   const dispatch = useDispatch();
@@ -111,7 +99,11 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
           <div key={tasksFilter.id}>
             <div>
               {tasksFilter.id && addButtonEditTaskList[tasksFilter.id] ? (
-                <div className="flex gap-2" onClick={stopPropagation} ref={ref}>
+                <div
+                  className="flex gap-2 mb-4"
+                  onClick={stopPropagation}
+                  ref={ref}
+                >
                   <div className="flex items-center gap-2">
                     <CheckSvg />
                     <input
@@ -147,19 +139,22 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="task-list flex items-center justify-between">
+                <div className="task-list flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <CheckSvg />
                     <span className="text-gray-300">{tasksFilter.name}:</span>
                   </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() =>
-                        tasksFilter.id && handleClickEditButton(tasksFilter.id)
-                      }
-                    >
-                      <EditSvg />
-                    </button>
+                  <div className="flex gap-3 ">
+                    <span>
+                      <EditSvg
+                        onClick={() =>
+                          handleAddButton({
+                            setShowButton: setAddButtonEditTaskList,
+                            valueId: tasksFilter.id,
+                          })
+                        }
+                      />
+                    </span>
                     <ModalComponent
                       title={<TreshSvg />}
                       funcConfirm={() => handleDeleteTaskList(tasksFilter.id)}
@@ -180,15 +175,24 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                   funcConfirm={() =>
                     handleCreateTask({ taskListId: tasksFilter.id })
                   }
-                  funcCancel={() => handleClickAddButton(tasksFilter.id)}
+                  funcCancel={() =>
+                    handleAddButton({
+                      valueId: tasksFilter.id,
+                      setShowButton: setAddButtonStates,
+                    })
+                  }
                 >
                   <button
                     onClick={() =>
-                      tasksFilter.id && handleClickAddButton(tasksFilter.id)
+                      handleAddButton({
+                        valueId: tasksFilter.id,
+                        setShowButton: setAddButtonStates,
+                      })
                     }
                     className="text-sm bg-BlackTheme-roudend p-1 rounded-md hover:text-green-700
-                      transition-all duration-150 border-2 border-gray-700 hover:border-green-700 mt-4"
+                      transition-all duration-150 border-2 border-gray-700 hover:border-green-700 mt-4 flex gap-2 items-center"
                   >
+                    <MoreSvg />
                     Adicionar um item
                   </button>
                 </InputConditionComp>

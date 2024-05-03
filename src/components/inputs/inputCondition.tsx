@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
+import { useClickOutside } from '../../util/hooks/useClickOutside';
 
 interface InputConditionProps {
   condition: any;
@@ -11,7 +12,8 @@ interface InputConditionProps {
   funcChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
-  value?: string;
+  valueInput?: string;
+  valueId?: number;
 }
 
 export const InputConditionComp = ({
@@ -20,22 +22,30 @@ export const InputConditionComp = ({
   funcCancel,
   funcConfirm,
   funcChange,
-  value,
+  valueInput,
+  valueId,
 }: InputConditionProps) => {
   const ref = useRef(null);
+
+  useClickOutside({
+    ref: ref,
+    callback: () => funcCancel,
+  });
 
   return (
     <>
       {condition ? (
         <div
           className="flex gap-2"
-          onClick={useStopPropagation().stopPropagation}
           ref={ref}
+          onClick={useStopPropagation().stopPropagation}
         >
           <input
             onChange={funcChange}
             type="text"
-            value={value}
+            value={valueInput}
+            id={`input-${valueId}`}
+            name={`input-${valueId}`}
             className="overflow-hidden resize-none text-sm rounded-lg outline-none p-1 
             bg-BlackTheme-list drop-shadow-lg text-gray-400
             border border-gray-400"
@@ -44,13 +54,13 @@ export const InputConditionComp = ({
             <ButtonGreen
               children="V"
               buttonProps={{
-                onClick: () => funcConfirm && funcConfirm(),
+                onClick: funcConfirm,
               }}
             />
             <ButtonRed
               children="X"
               buttonProps={{
-                onClick: () => funcCancel && funcCancel(),
+                onClick: funcCancel,
               }}
             />
           </div>

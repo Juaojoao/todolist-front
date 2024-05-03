@@ -25,6 +25,13 @@ module.exports = withMT({
           fundo: "#2A2B2F",
         },
       },
+      fill: {
+        aside: "#1C1D22",
+        card: "#292B31",
+        list: "#24262C",
+        fundo: "#2A2B2F",
+        
+      }
     },
   },
   plugins: [],

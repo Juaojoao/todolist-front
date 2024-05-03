@@ -1,56 +1,39 @@
 import './style.css';
-import { useDispatch, useSelector } from 'react-redux';
 import { Tasks } from '../../interfaces/todo-list.interface';
-import { TaskListService } from '../../services/api/taskListService';
 import { CheckBoxCustom } from '../inputs/checkBox';
-import { RootState } from '../../services/redux/root-reducer';
-import { getAllTaskList } from '../../services/redux/tasList/actions';
 import { CheckedSvg } from '../svg/checked';
 import { EditSvg } from '../svg/edit';
 import { TreshSvg } from '../svg/tresh';
 import { useState } from 'react';
-// import { useChangeInput } from '../../util/hooks/useChangeInput';
+import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { InputConditionComp } from '../inputs/inputCondition';
+import { handleAddButton } from '../../util/functions/handleAddInput';
+import { ModalComponent } from '../modal/modalAlert';
+import { TaskRequest } from '../../util/functions/requests/tasksRequests';
 
 interface taskProps {
   tasks: Tasks[];
 }
 
 export const TaskComp = ({ tasks }: taskProps) => {
-  
   const [showEditInput, setShowEditInput] = useState<{
     [key: number]: boolean;
   }>({});
 
-  // const handleEditInput = (taskId?: number) => {
-  //   if (!taskId) return;
+  const { input, handleInput } = useChangeInput({
+    editTaskDscription: '',
+  });
 
-  //   setShowEditInput((prevState) => ({
-  //     ...prevState,
-  //     [taskId]: !prevState[taskId],
-  //   }));
-  // };
-
-  // const { input, handleInput } = useChangeInput({
-  //   editTaskDscription: '',
-  // });
-
-  const userInfo = useSelector((state: RootState) => state.UserReducer);
-  const taskListService = new TaskListService();
-  const dispatch = useDispatch();
-
-  const handleTaskStatus = async ({ id, status }: Tasks) => {
-    if (!id) return;
-
-    await taskListService.updateTaskStatus({ id, status });
-    const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
-    dispatch(getAllTaskList(newTasksList));
-  };
+  const { handleTaskStatus, handleEditTask, handleDeleteTask } = TaskRequest();
 
   return (
     <>
-      {tasks.map((task) => (
-        <li key={task.id} className="pl-2 flex flex-col text-sm">
+      {tasks.map((task: Tasks) => (
+        <li
+          key={task.id}
+          className="pl-2 flex flex-col text-sm bg-BlackTheme-card border border-gray-700 
+          rounded-md mb-2 transition-all duration-150"
+        >
           <div className="info-task-list flex items-center">
             <label
               className="relative flex items-center p-3 rounded-full cursor-pointer"
@@ -74,31 +57,57 @@ export const TaskComp = ({ tasks }: taskProps) => {
               </span>
             </label>
             <label
-              className="mt-px font-light text-gray-700 cursor-pointer select-none w-full hover:bg-gray-800 
+              className="mt-px font-light text-gray-700 cursor-pointer select-none w-full 
               p-2 rounded-md transition-all duration-150 hover:text-gray-400 flex justify-between"
             >
-              {task.id && (
-                <InputConditionComp
-                  condition={showEditInput[task.id]}
-                  // funcCancel={() => setShowEditInput({})}
-                  // funcConfirm={() => 'foi papai'}
-                  // funcChange={handleInput('editTaskDscription')}
-                >
-                  <div className="flex gap-2">
-                    <div>
-                      <span className={task.status ? 'line-through' : ''}>
-                        {task.name}
-                      </span>
-                    </div>
-                    <button>
-                      <EditSvg />
-                    </button>
-                    <button>
-                      <TreshSvg />
-                    </button>
+              <InputConditionComp
+                condition={task.id && showEditInput[task.id]}
+                funcChange={handleInput('editTaskDscription')}
+                funcCancel={() =>
+                  handleAddButton({
+                    setShowButton: setShowEditInput,
+                    valueId: task.id,
+                  })
+                }
+                funcConfirm={() =>
+                  task.id &&
+                  handleEditTask(
+                    task.id,
+                    input.editTaskDscription,
+                    setShowEditInput,
+                  )
+                }
+                valueInput={
+                  input.editTaskDscription
+                    ? input.editTaskDscription
+                    : task.name
+                }
+                valueId={task.id}
+              >
+                <div className="flex justify-between w-full">
+                  <div>
+                    <span className={task.status ? 'line-through' : ''}>
+                      {task.name}
+                    </span>
                   </div>
-                </InputConditionComp>
-              )}
+                  <div className="flex gap-2 info-task-list-buttons">
+                    <span>
+                      <EditSvg
+                        onClick={() =>
+                          handleAddButton({
+                            setShowButton: setShowEditInput,
+                            valueId: task.id,
+                          })
+                        }
+                      />
+                    </span>
+                    <ModalComponent
+                      title={<TreshSvg />}
+                      funcConfirm={() => task.id && handleDeleteTask(task.id)}
+                    />
+                  </div>
+                </div>
+              </InputConditionComp>
             </label>
           </div>
         </li>

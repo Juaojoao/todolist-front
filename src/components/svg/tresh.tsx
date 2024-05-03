@@ -1,6 +1,9 @@
-export const TreshSvg = () => {
+interface svgProps extends React.SVGProps<SVGSVGElement> {}
+
+export const TreshSvg = ({ ...props }: svgProps) => {
   return (
     <svg
+      {...props}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
       className="w-5 fill-red-300 opacity-50 cursor-pointer hover:opacity-100 transition duration-500"

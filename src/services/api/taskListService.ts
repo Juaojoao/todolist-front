@@ -78,4 +78,26 @@ export class TaskListService {
       console.error('Error updating Task', error);
     }
   }
+
+  async updateTask({ id, name }: Tasks) {
+    if (!this.token || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      return await this.api.patch(`tasklist/task/update/${id}`, { name });
+    } catch (error) {
+      console.error('Error updating Task', error);
+    }
+  }
+
+  async deleteTask(id: number) {
+    if (!this.token || !id) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      return await this.api.delete(`tasklist/task/delete/${id}`);
+    } catch (error) {
+      console.error('Error deleting Task', error);
+    }
+  }
 }

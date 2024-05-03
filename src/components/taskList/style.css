@@ -1,8 +1,8 @@
-.info-task-list label button {
+.info-task-list label .info-task-list-buttons {
     opacity: 0;
     transition: all ease-in-out 0.3s;
 }
 
-.info-task-list:hover label button {
+.info-task-list:hover label .info-task-list-buttons {
     opacity: 1;
 }

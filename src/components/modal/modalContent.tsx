@@ -16,16 +16,16 @@ import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { TaskListService } from '../../services/api/taskListService';
 import { getAllTaskList } from '../../services/redux/tasList/actions';
-import { XisSvg } from '../svg/xis';
 import { EditSvg } from '../svg/edit';
 import { CardService } from '../../services/api/cardService';
 import { MoreSvg } from '../svg/more';
+import { CloseIcon } from '../svg/close';
 
 interface modalProps {
   cardSelected: number;
 }
 
-export const ModalContext = ({ cardSelected }: modalProps) => {
+export const ModalCardComp = ({ cardSelected }: modalProps) => {
   const taskListService = new TaskListService();
   const cardService = new CardService();
   const dispatch = useDispatch();
@@ -108,12 +108,7 @@ export const ModalContext = ({ cardSelected }: modalProps) => {
                 {cardInfo?.name}
               </h3>
             </div>
-            <button
-              className="text-gray-600 text-3xl hover:bg-gray-800 rounded-full transition duration-500 p-2"
-              onClick={() => dispatch(unsetSelectedCard())}
-            >
-              <XisSvg />
-            </button>
+            <CloseIcon onClick={() => dispatch(unsetSelectedCard())} />
           </div>
           <div className="description">
             <div className={`flex gap-2 flex-col`}>
