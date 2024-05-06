@@ -14,7 +14,6 @@ import { EditSvg } from '../svg/edit';
 import { TaskComp } from './task';
 import { InputConditionComp } from '../inputs/inputCondition';
 import { ModalComponent } from '../modal/modalAlert';
-import { TreshSvg } from '../svg/tresh';
 import { handleAddButton } from '../../util/functions/handleAddInput';
 import { MoreSvg } from '../svg/more';
 
@@ -156,7 +155,6 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                       />
                     </span>
                     <ModalComponent
-                      title={<TreshSvg />}
                       funcConfirm={() => handleDeleteTaskList(tasksFilter.id)}
                     />
                   </div>

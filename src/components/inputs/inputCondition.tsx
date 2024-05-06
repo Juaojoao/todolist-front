@@ -3,6 +3,8 @@ import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
+import { CheckedSvg } from '../svg/checked';
+import { ExitIcon } from '../svg/exit';
 
 interface InputConditionProps {
   condition: any;
@@ -52,13 +54,13 @@ export const InputConditionComp = ({
           />
           <div className="flex gap-2">
             <ButtonGreen
-              children="V"
+              children={<CheckedSvg />}
               buttonProps={{
                 onClick: funcConfirm,
               }}
             />
             <ButtonRed
-              children="X"
+              children={<ExitIcon />}
               buttonProps={{
                 onClick: funcCancel,
               }}

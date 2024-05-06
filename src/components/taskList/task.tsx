@@ -1,15 +1,15 @@
 import './style.css';
 import { Tasks } from '../../interfaces/todo-list.interface';
-import { CheckBoxCustom } from '../inputs/checkBox';
+import { CheckBoxComp } from '../inputs/checkBox';
 import { CheckedSvg } from '../svg/checked';
 import { EditSvg } from '../svg/edit';
-import { TreshSvg } from '../svg/tresh';
 import { useState } from 'react';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { InputConditionComp } from '../inputs/inputCondition';
 import { handleAddButton } from '../../util/functions/handleAddInput';
 import { ModalComponent } from '../modal/modalAlert';
 import { TaskRequest } from '../../util/functions/requests/tasksRequests';
+import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 
 interface taskProps {
   tasks: Tasks[];
@@ -37,9 +37,10 @@ export const TaskComp = ({ tasks }: taskProps) => {
           <div className="info-task-list flex items-center">
             <label
               className="relative flex items-center p-3 rounded-full cursor-pointer"
+              onClick={() => useStopPropagation().stopPropagation}
               htmlFor={task.name}
             >
-              <CheckBoxCustom
+              <CheckBoxComp
                 id={task.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleTaskStatus({
@@ -102,7 +103,6 @@ export const TaskComp = ({ tasks }: taskProps) => {
                       />
                     </span>
                     <ModalComponent
-                      title={<TreshSvg />}
                       funcConfirm={() => task.id && handleDeleteTask(task.id)}
                     />
                   </div>

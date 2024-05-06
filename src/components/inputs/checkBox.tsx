@@ -1,6 +1,6 @@
-import { CheckboxProps } from '@material-tailwind/react';
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-export const CheckBoxCustom: React.FC<CheckboxProps> = (props) => {
+export const CheckBoxComp = ({ ...props }: InputProps) => {
   return (
     <input
       type="checkbox"

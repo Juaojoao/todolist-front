@@ -6,19 +6,14 @@ import {
   DialogBody,
   DialogFooter,
 } from '@material-tailwind/react';
+import { TreshSvg } from '../svg/tresh';
 
 interface ModalProps extends React.HTMLAttributes<HTMLButtonElement> {
-  title: any;
   dialog?: string;
   funcConfirm?: () => void;
 }
 
-export const ModalComponent = ({
-  title,
-  funcConfirm,
-  dialog,
-  ...props
-}: ModalProps) => {
+export const ModalComponent = ({ funcConfirm, dialog }: ModalProps) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(!open);
 
@@ -29,13 +24,10 @@ export const ModalComponent = ({
 
   return (
     <>
-      <button
-        {...props}
+      <TreshSvg
         className="w-full outline-none border-none"
-        onClick={handleOpen}
-      >
-        {title}
-      </button>
+        onClick={() => setOpen(true)}
+      />
       <Dialog open={open} handler={handleOpen} className="bg-BlackTheme-card ">
         <DialogHeader className="text-gray-300">
           Você tem certeza desta ação?
@@ -52,10 +44,10 @@ export const ModalComponent = ({
             onClick={handleOpen}
             className="mr-1"
           >
-            <span>Cancel</span>
+            <span>Cancelar</span>
           </Button>
           <Button variant="gradient" color="green" onClick={handleConfirm}>
-            <span>Confirm</span>
+            <span>Confirmar</span>
           </Button>
         </DialogFooter>
       </Dialog>
