@@ -15,6 +15,7 @@ import { SpinSvg } from '../../components/svg/spin';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { validateLoginInputs } from '../../util/functions/validateLogin';
+import { useMessage } from '../../context/useGlobalContext';
 
 interface FormState {
   email: string;
@@ -24,6 +25,7 @@ interface FormState {
 export const LoginPage = () => {
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
   const { login, getAuhToken, itsTokenExpired, logout } = useAuth();
+  const { setMessage } = useMessage();
   const navigate = useNavigate();
   const token = getAuhToken();
 
@@ -53,6 +55,7 @@ export const LoginPage = () => {
 
     if (!isValid) {
       setError(newErrors || initialFormState);
+      setMessage({ type: 'warning', message: 'Campos em branco!' });
       setIsLoad(false);
       return;
     }
@@ -63,8 +66,8 @@ export const LoginPage = () => {
       setIsSubmit(true);
       setIsLoad(false);
     } catch (error: any) {
-      console.log(error);
       setIsLoad(false);
+      setMessage({ type: 'error', message: 'Email ou Senha Inválida' });
     }
   };
 

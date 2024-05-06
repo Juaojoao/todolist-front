@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { connectionAPI } from '../services/api/api';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { useMessage } from './useGlobalContext';
 
 type AuthContextType = {
   token: string | null;
@@ -20,6 +21,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
 
+  const getAuhToken = () => localStorage.getItem('token');
+  const { setMessage } = useMessage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,8 +46,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => connectionAPI.interceptors.response.eject(interceptor);
   }, [navigate]);
 
-  const getAuhToken = () => localStorage.getItem('token');
-
   const itsTokenExpired = (token: string): boolean => {
     const decodedToken: any = jwtDecode(token);
     const currentTime = Date.now() / 1000;
@@ -60,17 +61,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     setToken(token);
     localStorage.setItem('token', JSON.stringify(token));
+    setMessage({ type: 'success', message: 'Login efetuado com Sucesso!' });
     navigate('/dashboard');
   };
 
   const logout = () => {
     setToken(null);
     localStorage.removeItem('token');
+    setMessage({ type: 'success', message: 'Logout efetuado com Sucesso!' });
     navigate('/');
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, getAuhToken, itsTokenExpired }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        login,
+        logout,
+        getAuhToken,
+        itsTokenExpired,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

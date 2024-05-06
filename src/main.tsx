@@ -1,17 +1,16 @@
 import './index.css';
 import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter } from 'react-router-dom';
-import store from './services/redux/store';
 import ReactDOM from 'react-dom/client';
-import { Router } from './routes/routes';
-import { Provider } from 'react-redux';
+import { MessageProvider } from './context/useGlobalContext';
+import { App } from './app';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
-    <AuthProvider>
-      <Provider store={store}>
-        <Router />
-      </Provider>
-    </AuthProvider>
+    <MessageProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MessageProvider>
   </BrowserRouter>,
 );
