@@ -3,18 +3,17 @@ import { ButtonGreen } from '../buttons/buttonGreen';
 import { ButtonRed } from '../buttons/buttonRed';
 import { CardTodo } from '../card/card';
 import { MoreSvg } from '../svg/more';
-import { Card, List, User } from '../../interfaces/todo-list.interface';
+import { Card, List } from '../../interfaces/todo-list.interface';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
-import { CardService } from '../../services/api/cardService';
-import { getAllCards } from '../../services/redux/card/actions';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { EditSvg } from '../svg/edit';
 import { TreshSvg } from '../svg/tresh';
-import { TasksListsRequests } from '../../util/functions/requests/tasksListsRequests';
+import { ActivitiesListsRequests } from '../../util/functions/requests/activitiesListsRequests';
+import { CardsRequest } from '../../util/functions/requests/cardsRequests';
 
 type ContainerCardProps = {
   cards: Card[];
@@ -22,19 +21,15 @@ type ContainerCardProps = {
 };
 
 export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
-  const { deleteList, updateList } = TasksListsRequests();
-
-  const userInfo: User = useSelector((state: RootState) => state.UserReducer);
   const frameInfo = useSelector((state: RootState) => state.frameReducer);
+  const selectedFrame: number = frameInfo.selectedFrame;
+  const refOutSide = useRef(null);
+
+  const { deleteList, updateList } = ActivitiesListsRequests();
+  const { createCard } = CardsRequest();
 
   const [addInputEdit, setAddInputEdit] = useState(false);
   const [addInput, setAddInput] = useState(false);
-
-  const selectedFrame: number = frameInfo.selectedFrame;
-  const cardService = new CardService();
-  const dispatch = useDispatch();
-  const refOutSide = useRef(null);
-
   const { input, handleInput } = useChangeInput({
     createCard: '',
     updateListName: '',
@@ -49,26 +44,6 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
       setAddInputEdit(false), setAddInput(false);
     },
   });
-
-  const handleCreateCard = async ({ activitiesListId }: Card) => {
-    if (!activitiesListId) return;
-
-    try {
-      await cardService.createCard({
-        activitiesListId: activitiesListId,
-        name: input.createCard,
-      });
-      input.createCard = '';
-      setAddInput(false);
-
-      const newCards = await cardService.getAllCard(userInfo.id);
-      if (!newCards) return;
-
-      dispatch(getAllCards(newCards));
-    } catch (error) {
-      console.error('Error deleting List', error);
-    }
-  };
 
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
@@ -167,7 +142,11 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
                 children="Criar cartão"
                 buttonProps={{
                   onClick: () =>
-                    handleCreateCard({ activitiesListId: list.id }),
+                    createCard({
+                      activitiesListId: list.id,
+                      clearButton: setAddInput,
+                      input,
+                    }),
                 }}
               />
               <ButtonRed

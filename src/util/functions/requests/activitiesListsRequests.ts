@@ -5,7 +5,7 @@ import { User } from '../../../interfaces/todo-list.interface';
 import { filterList, getAllList } from '../../../services/redux/list/actions';
 import { useMessage } from '../../../context/useGlobalContext';
 
-interface TasksListsRequests {
+interface ActivitiesListsRequests {
   id?: number;
   input?: inputs;
   clearButton?: any;
@@ -18,13 +18,17 @@ interface inputs {
   updateListName?: string;
 }
 
-export const TasksListsRequests = () => {
+export const ActivitiesListsRequests = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
   const listService = new ListService();
   const { setMessage } = useMessage();
   const dispatch = useDispatch();
 
-  const createList = async ({ id, input, clearButton }: TasksListsRequests) => {
+  const createList = async ({
+    id,
+    input,
+    clearButton,
+  }: ActivitiesListsRequests) => {
     if (!input?.createList || !id) {
       return setMessage({ type: 'warning', message: 'Campo vazio!' });
     }
@@ -44,7 +48,6 @@ export const TasksListsRequests = () => {
       }
     } catch (error) {
       setMessage({ type: 'error', message: 'Erro ao criar lista!' });
-      console.log(error);
     }
   };
 
@@ -53,7 +56,7 @@ export const TasksListsRequests = () => {
     input,
     clearButton,
     selectedFrame,
-  }: TasksListsRequests) => {
+  }: ActivitiesListsRequests) => {
     if (!input?.updateListName || !id) {
       return setMessage({ type: 'warning', message: 'Campo vazio!' });
     }
@@ -79,7 +82,7 @@ export const TasksListsRequests = () => {
     id,
     clearButton,
     selectedFrame,
-  }: TasksListsRequests) => {
+  }: ActivitiesListsRequests) => {
     if (!id) {
       return setMessage({ type: 'error', message: 'Lista não encontrada!' });
     }

@@ -1,10 +1,6 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Tasks, taskList } from '../../interfaces/todo-list.interface';
-import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
-import { ButtonGreen } from '../buttons/buttonGreen';
-import { ButtonRed } from '../buttons/buttonRed';
-import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { TaskListService } from '../../services/api/taskListService';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllTaskList } from '../../services/redux/tasList/actions';
@@ -31,22 +27,12 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
     [key: number]: boolean;
   }>({});
 
-  const ref = useRef(null);
-
-  useClickOutside({
-    ref: ref,
-    callback: () => {
-      setAddButtonStates({}), setAddButtonEditTaskList({});
-    },
-  });
-
   const { input, handleInput } = useChangeInput({
     editTaskList: '',
     createTask: '',
   });
 
   const userInfo = useSelector((state: RootState) => state.UserReducer);
-  const stopPropagation = useStopPropagation().stopPropagation;
   const taskListService = new TaskListService();
   const dispatch = useDispatch();
 
@@ -97,47 +83,16 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
         .map((tasksFilter) => (
           <div key={tasksFilter.id}>
             <div>
-              {tasksFilter.id && addButtonEditTaskList[tasksFilter.id] ? (
-                <div
-                  className="flex gap-2 mb-4"
-                  onClick={stopPropagation}
-                  ref={ref}
-                >
-                  <div className="flex items-center gap-2">
-                    <CheckSvg />
-                    <input
-                      onChange={handleInput('editTaskList')}
-                      type="text"
-                      name="editTaskList"
-                      id="editTaskList"
-                      value={
-                        input.editTaskList
-                          ? input.editTaskList
-                          : tasksFilter.name
-                      }
-                      className="overflow-hidden resize-none text-sm rounded-lg outline-none p-1 
-                  bg-BlackTheme-list drop-shadow-lg text-gray-400
-                    border border-gray-400"
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <ButtonGreen
-                      children="V"
-                      buttonProps={{
-                        onClick: () => handleEditTaskList(tasksFilter.id),
-                      }}
-                    />
-                    <ButtonRed
-                      children="X"
-                      buttonProps={{
-                        onClick: () =>
-                          tasksFilter.id && setAddButtonEditTaskList({}),
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : (
+              <InputConditionComp
+                condition={
+                  tasksFilter.id && addButtonEditTaskList[tasksFilter.id]
+                }
+                childrenBefore={<CheckSvg />}
+                funcCancel={() => setAddButtonEditTaskList({})}
+                funcConfirm={() => handleEditTaskList(tasksFilter.id)}
+                funcChange={handleInput('editTaskList')}
+                valueId={tasksFilter.id}
+              >
                 <div className="task-list flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <CheckSvg />
@@ -159,7 +114,7 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                     />
                   </div>
                 </div>
-              )}
+              </InputConditionComp>
             </div>
             <ul className="pl-3 mb-5">
               {tasksFilter.tasks &&

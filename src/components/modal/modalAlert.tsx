@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Button,
   Dialog,
-  DialogHeader,
   DialogBody,
   DialogFooter,
 } from '@material-tailwind/react';
@@ -28,13 +27,15 @@ export const ModalComponent = ({ funcConfirm, dialog }: ModalProps) => {
         className="w-full outline-none border-none"
         onClick={() => setOpen(true)}
       />
-      <Dialog open={open} handler={handleOpen} className="bg-BlackTheme-card ">
-        <DialogHeader className="text-gray-300">
-          Você tem certeza desta ação?
-        </DialogHeader>
+      <Dialog open={open} handler={handleOpen} className="bg-BlackTheme-card">
         {dialog && (
           <DialogBody className="text-gray-300">
-            <p>{dialog}</p>
+            <p>
+              Você tem certeza que deseja
+              <span className="text-red-500 font-bold">
+                {''} EXCLUIR "{dialog.toUpperCase()}"
+              </span>
+            </p>
           </DialogBody>
         )}
         <DialogFooter>

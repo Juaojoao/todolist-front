@@ -10,7 +10,7 @@ import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
 import { ContainerCard } from './list-container';
-import { TasksListsRequests } from '../../util/functions/requests/tasksListsRequests';
+import { ActivitiesListsRequests } from '../../util/functions/requests/activitiesListsRequests';
 
 export const BodyContainer = () => {
   const listInfo = useSelector((state: RootState) => state.ListReducer);
@@ -20,7 +20,7 @@ export const BodyContainer = () => {
   const { cards } = useSelector((state: RootState) => state.CardReducer);
   const { input, handleInput } = useChangeInput({ createList: '' });
 
-  const { createList } = TasksListsRequests();
+  const { createList } = ActivitiesListsRequests();
 
   const [addInput, setAddInput] = useState(false);
 
