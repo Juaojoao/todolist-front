@@ -8,7 +8,7 @@ import { ExitIcon } from '../svg/exit';
 
 interface InputConditionProps {
   childrenBefore?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   funcConfirm?: () => void;
   inputOrTextArea?: string;
   funcCancel?: () => void;
@@ -87,7 +87,7 @@ export const InputConditionComp = ({
           </div>
         </div>
       ) : (
-        <>{children}</>
+        <>{children && children}</>
       )}
     </>
   );

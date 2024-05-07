@@ -15,11 +15,13 @@ interface CardsRequest {
   clearButton?: any;
   selectedFrame?: number;
   setState?: any;
+  description?: string;
 }
 
 interface inputs {
   createCard?: string;
   updateCardName?: string;
+  updateCardDescription?: string;
 }
 
 export const CardsRequest = () => {
@@ -115,5 +117,45 @@ export const CardsRequest = () => {
     dispatch(setSelectedCard(id));
   };
 
-  return { createCard, updateCard, deleteCard, selectCard };
+  const updateCardDescrition = async ({
+    id,
+    input,
+    clearButton,
+  }: CardsRequest) => {
+    if (!id || !input?.updateCardDescription) {
+      return setMessage({
+        type: 'warning',
+        message: 'Campo em branco!',
+      });
+    }
+
+    try {
+      await cardService.updateDescription({
+        id: id,
+        description: input.updateCardDescription,
+      });
+      setMessage({
+        type: 'success',
+        message: 'Descrição atualizada com sucesso!',
+      });
+
+      input.updateCardDescription = '';
+      clearButton(false);
+
+      const newCardDesc = await cardService.getAllCard(userInfo?.id);
+      if (newCardDesc) {
+        dispatch(getAllCards(newCardDesc));
+      }
+    } catch (error) {
+      setMessage({ type: 'error', message: 'Erro ao atualizar descrição!' });
+    }
+  };
+
+  return {
+    createCard,
+    updateCard,
+    deleteCard,
+    selectCard,
+    updateCardDescrition,
+  };
 };

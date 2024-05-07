@@ -1,89 +1,51 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, taskList } from '../../interfaces/todo-list.interface';
+import { Card } from '../../interfaces/todo-list.interface';
 import { TrelloSvg } from '../svg/trello';
-import {
-  getAllCards,
-  unsetSelectedCard,
-} from '../../services/redux/card/actions';
+import { unsetSelectedCard } from '../../services/redux/card/actions';
 import { DescriptionSvg } from '../svg/description';
 import { RootState } from '../../services/redux/root-reducer';
 import { TaskList } from '../taskList/tasklist';
 import { useEffect, useState } from 'react';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
-import { TaskListService } from '../../services/api/taskListService';
-import { getAllTaskList } from '../../services/redux/tasList/actions';
 import { EditSvg } from '../svg/edit';
-import { CardService } from '../../services/api/cardService';
 import { MoreSvg } from '../svg/more';
 import { CloseIcon } from '../svg/close';
 import { InputConditionComp } from '../inputs/inputCondition';
+import { TasksListsRequests } from '../../util/functions/requests/tasksListsRequests';
+import { CardsRequest } from '../../util/functions/requests/cardsRequests';
 
 interface modalProps {
   cardSelected: number;
 }
 
 export const ModalCardComp = ({ cardSelected }: modalProps) => {
-  const taskListService = new TaskListService();
-  const cardService = new CardService();
-  const dispatch = useDispatch();
-
   const [addButtonStates, setAddButtonStates] = useState<Boolean>(false);
-  const [addButtonEdit, setAddButtonEdit] = useState<Boolean>(false);
   const [cardInfo, setCardInfo] = useState<Card | undefined>(undefined);
+  const [addButtonEdit, setAddButtonEdit] = useState<Boolean>(false);
 
-  const userInfo = useSelector((state: RootState) => state.UserReducer);
-  const cards: Card[] = useSelector(
-    (state: RootState) => state.CardReducer.cards,
-  );
+  const { createTaskList } = TasksListsRequests();
+  const { updateCardDescrition } = CardsRequest();
+  const { input, handleInput } = useChangeInput({
+    createTaskList: '',
+    updateCardDescription: '',
+  });
 
-  const taskListInfo: taskList[] = useSelector(
+  // console.log(input);
+
+  const cards = useSelector((state: RootState) => state.CardReducer.cards);
+  const taskListInfo = useSelector(
     (state: RootState) => state.TaskListReducer.taskList,
   );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!cardSelected) return;
-    const card = cards.find((card) => card.id === cardSelected);
+    const card = cards.find((card: Card) => card.id === cardSelected);
     setCardInfo(card);
   }, [cardSelected, cards]);
 
-  const { input, handleInput } = useChangeInput({
-    createTaskList: '',
-    editDescription: '',
-  });
-
   const handleClickAddButton = () => setAddButtonStates(!addButtonStates);
   const handleClickEditButton = () => setAddButtonEdit(!addButtonEdit);
-
-  const handleCreateTaskList = async () => {
-    if (!cardInfo?.id || input.createTaskList === '') return;
-
-    await taskListService.createTaskList({
-      cardId: cardInfo?.id,
-      name: input.createTaskList,
-    });
-
-    input.createTaskList = '';
-    setAddButtonStates(false);
-
-    const newTaskList = await taskListService.getAllTaskList(userInfo.id);
-    dispatch(getAllTaskList(newTaskList));
-  };
-
-  const handleEditDescrition = async () => {
-    if (!cardInfo?.id || input.editDescription === '') return;
-
-    await cardService.updateDescription({
-      id: cardInfo?.id,
-      description: input.editDescription,
-    });
-
-    input.editDescription = '';
-    setAddButtonEdit(false);
-
-    const newCardDesc = await cardService.getAllCard(userInfo?.id);
-    if (!newCardDesc) return;
-    dispatch(getAllCards(newCardDesc));
-  };
 
   return (
     <section className="w-screen">
@@ -108,18 +70,24 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
                 <EditSvg onClick={() => handleClickEditButton()} />
               </div>
               <InputConditionComp
-                funcChange={handleInput('editDescription')}
+                funcChange={handleInput('updateCardDescription')}
                 funcCancel={() => setAddButtonEdit(false)}
-                funcConfirm={() => handleEditDescrition()}
+                funcConfirm={() =>
+                  updateCardDescrition({
+                    id: cardInfo?.id,
+                    clearButton: setAddButtonEdit,
+                    input,
+                  })
+                }
                 inputOrTextArea="textarea"
                 condition={addButtonEdit}
                 valueId={cardInfo?.id}
                 flexCol={true}
               >
-                <div>
+                <div className="max-w-full break-words">
                   {!addButtonEdit && cardInfo?.description && (
                     <span
-                      className="text-sm text-gray-400 font-sans
+                      className="text-sm text-gray-400 font-sans pre-wrap
                      bg-BlackTheme-card w-full block p-2 rounded-md"
                     >
                       {cardInfo?.description}
@@ -135,16 +103,23 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
               <span className="text-sm w-full">Tarefas:</span>
               <InputConditionComp
                 funcCancel={() => setAddButtonStates(false)}
-                funcConfirm={() => handleCreateTaskList()}
+                funcConfirm={() =>
+                  createTaskList({
+                    cardId: cardInfo?.id,
+                    input: input,
+                    clearButton: setAddButtonStates,
+                  })
+                }
                 funcChange={handleInput('createTaskList')}
                 condition={addButtonStates}
                 valueId={cardInfo?.id}
               >
                 <button
                   onClick={handleClickAddButton}
-                  className="text-smp-1 rounded-md border border-gray-600 hover:text-green-700
-                  transition-all duration-150  hover:border-green-700 flex 
-                  items-center gap-2 p-1 w-1/2 justify-center"
+                  className="text-sm bg-BlackTheme-roudend p-1 rounded-md
+                  hover:text-green-700 transition-all duration-150 
+                  border-2 border-gray-700 hover:border-green-700 mt-4 
+                  flex gap-2 items-center w-1/2 justify-center"
                 >
                   <MoreSvg />
                   NOVA LISTA

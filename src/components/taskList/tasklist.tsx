@@ -1,10 +1,6 @@
 import { useState } from 'react';
-import { Tasks, taskList } from '../../interfaces/todo-list.interface';
+import { taskList } from '../../interfaces/todo-list.interface';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
-import { TaskListService } from '../../services/api/taskListService';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllTaskList } from '../../services/redux/tasList/actions';
-import { RootState } from '../../services/redux/root-reducer';
 import { CheckSvg } from '../svg/check';
 import { EditSvg } from '../svg/edit';
 import { TaskComp } from './task';
@@ -12,6 +8,8 @@ import { InputConditionComp } from '../inputs/inputCondition';
 import { ModalComponent } from '../modal/modalAlert';
 import { handleAddButton } from '../../util/functions/handleAddInput';
 import { MoreSvg } from '../svg/more';
+import { TasksListsRequests } from '../../util/functions/requests/tasksListsRequests';
+import { TaskRequest } from '../../util/functions/requests/tasksRequests';
 
 interface TaskListProps {
   taskList: taskList[];
@@ -19,6 +17,9 @@ interface TaskListProps {
 }
 
 export const TaskList = ({ taskList, cardId }: TaskListProps) => {
+  const { deleteTaskList, updateTaskList } = TasksListsRequests();
+  const { createTask } = TaskRequest();
+
   const [addButtonStates, setAddButtonStates] = useState<{
     [key: number]: boolean;
   }>({});
@@ -28,53 +29,9 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
   }>({});
 
   const { input, handleInput } = useChangeInput({
-    editTaskList: '',
+    updateTaskList: '',
     createTask: '',
   });
-
-  const userInfo = useSelector((state: RootState) => state.UserReducer);
-  const taskListService = new TaskListService();
-  const dispatch = useDispatch();
-
-  const handleCreateTask = async ({ taskListId }: Tasks) => {
-    if (input.createTask === '' || !taskListId) return;
-
-    await taskListService.createTask({
-      name: input.createTask,
-      taskListId: taskListId,
-    });
-
-    input.createTask = '';
-    setAddButtonStates({});
-
-    const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
-    dispatch(getAllTaskList(newTasksList));
-  };
-
-  const handleDeleteTaskList = async (id?: number) => {
-    if (!id) return;
-
-    await taskListService.deleteTaskList(id);
-    const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
-    dispatch(getAllTaskList(newTasksList));
-  };
-
-  const handleEditTaskList = async (id?: number) => {
-    if (!id || input.editTaskList === '') return;
-
-    const response = await taskListService.updateNameTaskList({
-      id,
-      name: input.editTaskList,
-    });
-
-    if (response?.status === 200) {
-      input.editTaskList = '';
-      setAddButtonEditTaskList({});
-
-      const newTasksList = await taskListService.getAllTaskList(userInfo?.id);
-      dispatch(getAllTaskList(newTasksList));
-    }
-  };
 
   return (
     <div className="task-list-content">
@@ -89,8 +46,14 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                 }
                 childrenBefore={<CheckSvg />}
                 funcCancel={() => setAddButtonEditTaskList({})}
-                funcConfirm={() => handleEditTaskList(tasksFilter.id)}
-                funcChange={handleInput('editTaskList')}
+                funcConfirm={() =>
+                  updateTaskList({
+                    id: tasksFilter.id,
+                    input: input,
+                    clearButton: setAddButtonEditTaskList,
+                  })
+                }
+                funcChange={handleInput('updateTaskList')}
                 valueId={tasksFilter.id}
               >
                 <div className="task-list flex items-center justify-between mb-4">
@@ -110,13 +73,14 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                       />
                     </span>
                     <ModalComponent
-                      funcConfirm={() => handleDeleteTaskList(tasksFilter.id)}
+                      dialog={tasksFilter.name}
+                      funcConfirm={() => deleteTaskList({ id: tasksFilter.id })}
                     />
                   </div>
                 </div>
               </InputConditionComp>
             </div>
-            <ul className="pl-3 mb-5">
+            <ul className="pl-3 my-4">
               {tasksFilter.tasks &&
                 tasksFilter.tasks
                   .filter((tasks) => tasks.taskListId === tasksFilter.id)
@@ -126,7 +90,11 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                   condition={tasksFilter.id && addButtonStates[tasksFilter.id]}
                   funcChange={handleInput('createTask')}
                   funcConfirm={() =>
-                    handleCreateTask({ taskListId: tasksFilter.id })
+                    createTask({
+                      taskListId: tasksFilter.id,
+                      input: input,
+                      clearButton: setAddButtonStates,
+                    })
                   }
                   funcCancel={() =>
                     handleAddButton({
@@ -142,11 +110,13 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                         setShowButton: setAddButtonStates,
                       })
                     }
-                    className="text-sm bg-BlackTheme-roudend p-1 rounded-md hover:text-green-700
-                      transition-all duration-150 border-2 border-gray-700 hover:border-green-700 mt-4 flex gap-2 items-center"
+                    className="text-sm bg-BlackTheme-roudend p-1 rounded-md
+                     hover:text-green-700 transition-all duration-150 
+                     border-2 border-gray-700 hover:border-green-700 mt-4 
+                     flex gap-2 items-center"
                   >
                     <MoreSvg />
-                    Adicionar um item
+                    Adicionar uma tarefa
                   </button>
                 </InputConditionComp>
               </div>

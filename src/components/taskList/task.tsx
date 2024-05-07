@@ -21,10 +21,10 @@ export const TaskComp = ({ tasks }: taskProps) => {
   }>({});
 
   const { input, handleInput } = useChangeInput({
-    editTaskDscription: '',
+    updateTaskName: '',
   });
 
-  const { handleTaskStatus, handleEditTask, handleDeleteTask } = TaskRequest();
+  const { updateTaskStatus, updateTaskName, deleteTask } = TaskRequest();
 
   return (
     <>
@@ -43,7 +43,7 @@ export const TaskComp = ({ tasks }: taskProps) => {
               <CheckBoxComp
                 id={task.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleTaskStatus({
+                  updateTaskStatus({
                     id: task.id,
                     status: e.target.checked,
                   })
@@ -63,7 +63,7 @@ export const TaskComp = ({ tasks }: taskProps) => {
             >
               <InputConditionComp
                 condition={task.id && showEditInput[task.id]}
-                funcChange={handleInput('editTaskDscription')}
+                funcChange={handleInput('updateTaskName')}
                 funcCancel={() =>
                   handleAddButton({
                     setShowButton: setShowEditInput,
@@ -72,16 +72,11 @@ export const TaskComp = ({ tasks }: taskProps) => {
                 }
                 funcConfirm={() =>
                   task.id &&
-                  handleEditTask(
-                    task.id,
-                    input.editTaskDscription,
-                    setShowEditInput,
-                  )
-                }
-                valueInput={
-                  input.editTaskDscription
-                    ? input.editTaskDscription
-                    : task.name
+                  updateTaskName({
+                    id: task.id,
+                    input: input,
+                    clearButton: setShowEditInput,
+                  })
                 }
                 valueId={task.id}
               >
@@ -103,7 +98,8 @@ export const TaskComp = ({ tasks }: taskProps) => {
                       />
                     </span>
                     <ModalComponent
-                      funcConfirm={() => task.id && handleDeleteTask(task.id)}
+                      dialog={task.name}
+                      funcConfirm={() => task.id && deleteTask({ id: task.id })}
                     />
                   </div>
                 </div>

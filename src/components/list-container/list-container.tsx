@@ -1,19 +1,16 @@
-import { useRef, useState } from 'react';
-import { ButtonGreen } from '../buttons/buttonGreen';
-import { ButtonRed } from '../buttons/buttonRed';
+import { useState } from 'react';
 import { CardTodo } from '../card/card';
 import { MoreSvg } from '../svg/more';
 import { Card, List } from '../../interfaces/todo-list.interface';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { DropDownButton } from '../buttons/dropDown';
-import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
-import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { EditSvg } from '../svg/edit';
 import { TreshSvg } from '../svg/tresh';
 import { ActivitiesListsRequests } from '../../util/functions/requests/activitiesListsRequests';
 import { CardsRequest } from '../../util/functions/requests/cardsRequests';
+import { InputConditionComp } from '../inputs/inputCondition';
 
 type ContainerCardProps = {
   cards: Card[];
@@ -23,7 +20,6 @@ type ContainerCardProps = {
 export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const frameInfo = useSelector((state: RootState) => state.frameReducer);
   const selectedFrame: number = frameInfo.selectedFrame;
-  const refOutSide = useRef(null);
 
   const { deleteList, updateList } = ActivitiesListsRequests();
   const { createCard } = CardsRequest();
@@ -38,13 +34,6 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const handleaddInputEdit = () => setAddInputEdit(!addInputEdit);
   const handleAddInput = () => setAddInput(!addInput);
 
-  useClickOutside({
-    ref: refOutSide,
-    callback: () => {
-      setAddInputEdit(false), setAddInput(false);
-    },
-  });
-
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
       <div
@@ -52,62 +41,38 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
        p-3 flex flex-col gap-3 rounded-xl border-collapse border-2 border-gray-900"
       >
         <div className="list-top flex justify-between items-center px-3">
-          {!addInputEdit ? (
-            <>
-              <p className="text-sm font-semibold opacity-50">
-                {list.name && list?.name?.length > 20
-                  ? `${list.name.substring(0, 20)}...`
-                  : list.name}
-              </p>
-
-              <DropDownButton textName="...">
-                <EditSvg onClick={handleaddInputEdit} />
-                <TreshSvg
-                  onClick={() =>
-                    deleteList({
-                      id: list.id,
-                      clearButton: setAddInputEdit,
-                      selectedFrame,
-                    })
-                  }
-                />
-              </DropDownButton>
-            </>
-          ) : (
-            <div
-              className="flex gap-2 items-center justify-center"
-              ref={refOutSide}
-            >
-              <input
-                type="text"
-                name="updateListName"
-                id="updateListName"
-                onChange={handleInput('updateListName')}
-                placeholder="Editar"
-                className="overflow-hidden resize-none text-sm drop-shadow-2xl py-2
-                 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
-                onClick={useStopPropagation().stopPropagation}
+          <InputConditionComp
+            condition={addInputEdit}
+            funcChange={handleInput('updateListName')}
+            funcCancel={() => setAddInputEdit(false)}
+            funcConfirm={() =>
+              updateList({
+                id: list.id,
+                input: input,
+                clearButton: setAddInputEdit,
+                selectedFrame,
+              })
+            }
+            valueId={list.id}
+          >
+            <p className="text-sm font-semibold opacity-50">
+              {list.name && list?.name?.length > 20
+                ? `${list.name.substring(0, 20)}...`
+                : list.name}
+            </p>
+            <DropDownButton textName="...">
+              <EditSvg onClick={handleaddInputEdit} />
+              <TreshSvg
+                onClick={() =>
+                  deleteList({
+                    id: list.id,
+                    clearButton: setAddInputEdit,
+                    selectedFrame,
+                  })
+                }
               />
-              <div className="flex gap-2">
-                <ButtonGreen
-                  children="Salvar"
-                  buttonProps={{
-                    onClick: () =>
-                      updateList({
-                        id: list.id,
-                        input: input,
-                        clearButton: setAddInputEdit,
-                        selectedFrame,
-                      }),
-                  }}
-                />
-                <ButtonRed
-                  children="X"
-                  buttonProps={{ onClick: () => setAddInputEdit(false) }}
-                />
-              </div>
-            </div>
-          )}
+            </DropDownButton>
+          </InputConditionComp>
         </div>
 
         <div className="shadow flex flex-col p-2 gap-3 items-center overflow-y-auto drop-shadow-xl">
@@ -118,7 +83,19 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
           )}
         </div>
 
-        {!addInput ? (
+        <InputConditionComp
+          condition={addInput}
+          funcChange={handleInput('createCard')}
+          funcCancel={() => setAddInput(false)}
+          funcConfirm={() =>
+            createCard({
+              activitiesListId: list.id,
+              clearButton: setAddInput,
+              input,
+            })
+          }
+          valueId={list.id}
+        >
           <div className="w-full flex flex-col">
             <button
               onClick={handleAddInput}
@@ -127,37 +104,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
               <MoreSvg /> Adicionar um cartão
             </button>
           </div>
-        ) : (
-          <div className="w-full flex flex-col" ref={refOutSide}>
-            <input
-              type="text"
-              name="createCard"
-              id="createCard"
-              onChange={handleInput('createCard')}
-              placeholder="Digite o nome do cartão"
-              className="overflow-hidden resize-none text-sm drop-shadow-2xl py-6 w-full rounded-lg outline-none p-2 bg-BlackTheme-card text-gray-400"
-            />
-            <div className="flex gap-2 mt-2">
-              <ButtonGreen
-                children="Criar cartão"
-                buttonProps={{
-                  onClick: () =>
-                    createCard({
-                      activitiesListId: list.id,
-                      clearButton: setAddInput,
-                      input,
-                    }),
-                }}
-              />
-              <ButtonRed
-                children="X"
-                buttonProps={{
-                  onClick: () => setAddInput(false),
-                }}
-              />
-            </div>
-          </div>
-        )}
+        </InputConditionComp>
       </div>
     </li>
   );

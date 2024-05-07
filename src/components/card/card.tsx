@@ -63,7 +63,7 @@ export const CardTodo = ({ card }: CardTodoProps) => {
           valueId={card.id}
         >
           <div
-            className={`card-desc-wrapper flex flex-col ${card.description && 'gap-1'}`}
+            className={`card-desc-wrapper w-full flex flex-col ${card.description && 'gap-1'}`}
           >
             <p className="text-xs font-sans">
               {card.name && card.name?.length > 30
@@ -71,7 +71,13 @@ export const CardTodo = ({ card }: CardTodoProps) => {
                 : card.name}
             </p>
 
-            <p className="font-medium text-xs opacity-50">{card.description}</p>
+            {card.description && (
+              <p className="font-medium text-xs opacity-50">
+                {card.description.length > 30
+                  ? `${card.description.substring(0, 20)}...`
+                  : card.description}
+              </p>
+            )}
           </div>
           <DropDownButton textName="...">
             <button onClick={handleaddInputEdit}>

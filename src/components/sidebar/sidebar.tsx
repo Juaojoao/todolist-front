@@ -6,17 +6,16 @@ import { ExitIcon } from '../svg/exit';
 import { useAuth } from '../../context/AuthContext';
 import { animated, useTransition } from 'react-spring';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
-import { ButtonRed } from '../buttons/buttonRed';
-import { ButtonGreen } from '../buttons/buttonGreen';
 import { DropDownButton } from '../buttons/dropDown';
-import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
 import { Quadro, User } from '../../interfaces/todo-list.interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
 import { EditSvg } from '../svg/edit';
-import { TreshSvg } from '../svg/tresh';
 import { FramesRequests } from '../../util/functions/requests/framesRequests';
+import { InputConditionComp } from '../inputs/inputCondition';
+import { ModalComponent } from '../modal/modalAlert';
+import { useClickOutside } from '../../util/hooks/useClickOutside';
 
 export const Sidebar = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
@@ -44,20 +43,15 @@ export const Sidebar = () => {
   });
 
   const buttonTransitions = useTransition(addInput, {
-    from: { opacity: 0, transform: 'translateY(-20px)' },
+    from: { opacity: 0, transform: 'translateY(-30px)' },
     enter: { opacity: 1, transform: 'translateY(0px)' },
-    leave: { opacity: 0, transform: 'translateY(-20px)' },
+    leave: { opacity: 0, transform: 'translateY(-30px)' },
   });
 
   const handleAddButton = () => setAddInput(!addInput);
   const handleClick = () => setOpen(!open);
 
-  useClickOutside({
-    ref: sidebarRef,
-    callback: () => {
-      setOpen(false), setAddInput(false);
-    },
-  });
+  useClickOutside({ ref: sidebarRef, callback: () => setOpen(false) });
 
   const handleAddInput = ({ id }: Quadro) => {
     if (!id) return;
@@ -99,36 +93,19 @@ export const Sidebar = () => {
                 {buttonTransitions(
                   (styleButton, item) =>
                     item && (
-                      <animated.div
-                        style={styleButton}
-                        className="flex gap-3 items-center flex-col p-3  m-3 rounded-xl "
-                      >
-                        <input
-                          type="text"
-                          placeholder="Criar novo Quadro"
-                          className="input-box w-full bg-transparent border p-2 rounded-lg border-gray-600 focus:border-gray-50 outline-none text-gray-50"
-                          value={input.createFrame}
-                          onChange={handleInput('createFrame')}
-                          name="name"
-                          id="name"
+                      <animated.div style={styleButton} className="p-3">
+                        <InputConditionComp
+                          condition={addInput}
+                          funcConfirm={() =>
+                            createFrame({
+                              input: input,
+                              clearButton: setAddInput,
+                            })
+                          }
+                          funcCancel={() => setAddInput(false)}
+                          funcChange={handleInput('createFrame')}
+                          valueId={userInfo.id}
                         />
-                        <div className="flex gap-2 w-full">
-                          <ButtonGreen
-                            children="Criar"
-                            buttonProps={{
-                              onClick: () =>
-                                createFrame({
-                                  input: input,
-                                  clearButton: setAddInput,
-                                }),
-                            }}
-                          />
-
-                          <ButtonRed
-                            children="X"
-                            buttonProps={{ onClick: () => setAddInput(false) }}
-                          />
-                        </div>
                       </animated.div>
                     ),
                 )}
@@ -147,46 +124,21 @@ export const Sidebar = () => {
                       }
                     >
                       <div className="flex items-center justify-between w-full px-2">
-                        {editingProjectId === project.id ? (
-                          <div
-                            className="flex justify-center items-center gap-2 w-full"
-                            onClick={useStopPropagation().stopPropagation}
-                          >
-                            <input
-                              value={input.createFrame}
-                              onChange={handleInput('updateFrame')}
-                              type="text"
-                              name="name"
-                              id="name"
-                              className="overflow-hidden
-                              resize-none text-sm rounded-lg outline-none p-2 
-                            bg-BlackTheme-list drop-shadow-lg text-gray-400
-                              border border-gray-400 w-full"
-                            />
-                            <div className="flex gap-2">
-                              <ButtonGreen
-                                children="V"
-                                buttonProps={{
-                                  onClick: () =>
-                                    updateFrame({
-                                      id: project.id,
-                                      input: input,
-                                      clearButton: setEditingProjectId,
-                                    }),
-                                }}
-                              />
-                              <ButtonRed
-                                children="X"
-                                buttonProps={{
-                                  onClick: () => setEditingProjectId(null),
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ) : (
+                        <InputConditionComp
+                          condition={editingProjectId === project.id}
+                          funcChange={handleInput('updateFrame')}
+                          valueInput={input.updateFrame}
+                          valueId={project.id}
+                          funcCancel={() => setEditingProjectId(null)}
+                          funcConfirm={() =>
+                            updateFrame({
+                              id: project.id,
+                              input: input,
+                              clearButton: setEditingProjectId,
+                            })
+                          }
+                        >
                           <p>{project.name}</p>
-                        )}
-                        {!editingProjectId && (
                           <DropDownButton
                             props={{
                               onClick: useStopPropagation().stopPropagation,
@@ -196,11 +148,14 @@ export const Sidebar = () => {
                             <EditSvg
                               onClick={() => handleAddInput({ id: project.id })}
                             />
-                            <TreshSvg
-                              onClick={() => deleteFrame({ id: project.id })}
+                            <ModalComponent
+                              dialog={project.name}
+                              funcConfirm={() =>
+                                deleteFrame({ id: project.id })
+                              }
                             />
                           </DropDownButton>
-                        )}
+                        </InputConditionComp>
                       </div>
                     </a>
                   ))}
