@@ -17,6 +17,7 @@ import { ModalCardComp } from '../../../components/modal/modalContent';
 import { RootState } from '../../../services/redux/root-reducer';
 import { TaskListService } from '../../../services/api/taskListService';
 import { getAllTaskList } from '../../../services/redux/tasList/actions';
+import { useMessage } from '../../../context/useGlobalContext';
 
 export const ListTodo = () => {
   const { getAuhToken } = useAuth();
@@ -30,6 +31,8 @@ export const ListTodo = () => {
   const listService = new ListService();
   const cardService = new CardService();
   const taskListService = new TaskListService();
+
+  const { setMessage } = useMessage();
 
   const { selectedCard } = useSelector((state: RootState) => state.CardReducer);
 
@@ -51,6 +54,11 @@ export const ListTodo = () => {
         dispatch(getAllList(lists));
         dispatch(getAllCards(cards));
         dispatch(getAllTaskList(taskList));
+
+        setMessage({
+          type: 'success',
+          message: 'Informações atualizadas com sucesso!',
+        });
       };
       fetchUserInfo();
     } else {

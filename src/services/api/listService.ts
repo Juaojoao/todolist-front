@@ -41,7 +41,7 @@ export class ListService {
     }
   }
 
-  async updateList(id: number, name: string) {
+  async updateList(id?: number, name?: string) {
     if (!id || !name || !this.token) return;
 
     try {

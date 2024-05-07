@@ -9,7 +9,7 @@ export class FrameService {
   private api = connectionAPI;
   private token = getTokenFromLocalStorage();
 
-  async createFrame(userId: number, name: string) {
+  async createFrame(userId?: number, name?: string) {
     if (!userId || !name || !this.token) return;
     const UserId = Number(userId);
     try {

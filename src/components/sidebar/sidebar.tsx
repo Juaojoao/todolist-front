@@ -11,32 +11,31 @@ import { ButtonGreen } from '../buttons/buttonGreen';
 import { DropDownButton } from '../buttons/dropDown';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
-import { ModalComponent } from '../modal/modalAlert';
 import { Quadro, User } from '../../interfaces/todo-list.interface';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
-import { FrameService } from '../../services/api/frameService';
-import { filterFrames, getAllFrames } from '../../services/redux/frame/actions';
-import { filterList } from '../../services/redux/list/actions';
 import { EditSvg } from '../svg/edit';
 import { TreshSvg } from '../svg/tresh';
+import { FramesRequests } from '../../util/functions/requests/framesRequests';
 
 export const Sidebar = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
   const { frames } = useSelector((state: RootState) => state.frameReducer);
 
-  const { input, handleInput } = useChangeInput({ name: '' });
+  const { input, handleInput } = useChangeInput({
+    createFrame: '',
+    updateFrame: '',
+  });
   const { logout } = useAuth();
 
-  const frameService = new FrameService();
-  const sidebarRef = useRef(null);
-  const dispatch = useDispatch();
+  const { createFrame, updateFrame, deleteFrame, handleSetSelectedFrame } =
+    FramesRequests();
 
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
-
   const [addInput, setAddInput] = useState(false);
   const [open, setOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   const transitions = useTransition(open, {
     from: { opacity: 0, transform: 'translateX(-100%)' },
@@ -50,69 +49,19 @@ export const Sidebar = () => {
     leave: { opacity: 0, transform: 'translateY(-20px)' },
   });
 
-  const closeAll = () => {
-    setOpen(false);
-    setAddInput(false);
-  };
-
-  useClickOutside({ ref: sidebarRef, callback: closeAll });
-
+  const handleAddButton = () => setAddInput(!addInput);
   const handleClick = () => setOpen(!open);
+
+  useClickOutside({
+    ref: sidebarRef,
+    callback: () => {
+      setOpen(false), setAddInput(false);
+    },
+  });
 
   const handleAddInput = ({ id }: Quadro) => {
     if (!id) return;
     setEditingProjectId(id);
-  };
-
-  const handleAddButton = () => setAddInput(!addInput);
-
-  const handleCreateFrame = async () => {
-    if (input.name === '' || !userInfo.id) return;
-    try {
-      await frameService.createFrame(userInfo.id, input.name);
-      const newFrames = await frameService.getAllFrames(userInfo.id);
-      if (!newFrames) return;
-
-      input.name = '';
-      setAddInput(false);
-      dispatch(getAllFrames(newFrames));
-    } catch (error) {
-      console.error('Error creating Frame', error);
-    }
-  };
-
-  const handleUpdateFrame = async ({ id }: Quadro) => {
-    if (input.name === '' || !id) return;
-
-    try {
-      await frameService.updateInfoFrame(id, input.name);
-      const newFrames = await frameService.getAllFrames(userInfo.id);
-      if (!newFrames) return;
-
-      input.name = '';
-      setEditingProjectId(null);
-      dispatch(getAllFrames(newFrames));
-    } catch (error) {
-      console.error('Error creating Frame', error);
-    }
-  };
-
-  const handleDeleteFrame = async ({ id }: Quadro) => {
-    if (!id) return;
-    try {
-      await frameService.deleteFrame(id);
-      const newFrames = await frameService.getAllFrames(userInfo.id);
-      if (!newFrames) return;
-
-      dispatch(getAllFrames(newFrames));
-    } catch (error) {}
-  };
-
-  const handleSelectFrame = ({ id }: Quadro) => {
-    if (!id) return;
-    dispatch(filterList(id));
-    dispatch(filterFrames(id));
-    setSelectedFrame(id);
   };
 
   return (
@@ -158,8 +107,8 @@ export const Sidebar = () => {
                           type="text"
                           placeholder="Criar novo Quadro"
                           className="input-box w-full bg-transparent border p-2 rounded-lg border-gray-600 focus:border-gray-50 outline-none text-gray-50"
-                          value={input.name}
-                          onChange={handleInput('name')}
+                          value={input.createFrame}
+                          onChange={handleInput('createFrame')}
                           name="name"
                           id="name"
                         />
@@ -167,7 +116,11 @@ export const Sidebar = () => {
                           <ButtonGreen
                             children="Criar"
                             buttonProps={{
-                              onClick: () => handleCreateFrame(),
+                              onClick: () =>
+                                createFrame({
+                                  input: input,
+                                  clearButton: setAddInput,
+                                }),
                             }}
                           />
 
@@ -186,7 +139,12 @@ export const Sidebar = () => {
                       key={project.id}
                       className={`button-hover cursor-pointer p-3 flex gap-3 items-center w-full 
                       ${selectedFrame === project.id ? 'bg-gray-800' : ''}`}
-                      onClick={() => handleSelectFrame({ id: project.id })}
+                      onClick={() =>
+                        handleSetSelectedFrame({
+                          id: project.id,
+                          setState: setSelectedFrame,
+                        })
+                      }
                     >
                       <div className="flex items-center justify-between w-full px-2">
                         {editingProjectId === project.id ? (
@@ -195,23 +153,26 @@ export const Sidebar = () => {
                             onClick={useStopPropagation().stopPropagation}
                           >
                             <input
-                              value={input.name}
-                              placeholder={project.name}
-                              onChange={handleInput('name')}
+                              value={input.createFrame}
+                              onChange={handleInput('updateFrame')}
                               type="text"
                               name="name"
                               id="name"
                               className="overflow-hidden
-                             resize-none text-sm rounded-lg outline-none p-2 
-                           bg-BlackTheme-list drop-shadow-lg text-gray-400
-                             border border-gray-400 w-full"
+                              resize-none text-sm rounded-lg outline-none p-2 
+                            bg-BlackTheme-list drop-shadow-lg text-gray-400
+                              border border-gray-400 w-full"
                             />
                             <div className="flex gap-2">
                               <ButtonGreen
                                 children="V"
                                 buttonProps={{
                                   onClick: () =>
-                                    handleUpdateFrame({ id: project.id }),
+                                    updateFrame({
+                                      id: project.id,
+                                      input: input,
+                                      clearButton: setEditingProjectId,
+                                    }),
                                 }}
                               />
                               <ButtonRed
@@ -232,16 +193,11 @@ export const Sidebar = () => {
                             }}
                             textName="..."
                           >
-                            <button
+                            <EditSvg
                               onClick={() => handleAddInput({ id: project.id })}
-                            >
-                              <EditSvg />
-                            </button>
-                            <ModalComponent
-                              title={<TreshSvg />}
-                              funcConfirm={() =>
-                                handleDeleteFrame({ id: project.id })
-                              }
+                            />
+                            <TreshSvg
+                              onClick={() => deleteFrame({ id: project.id })}
                             />
                           </DropDownButton>
                         )}

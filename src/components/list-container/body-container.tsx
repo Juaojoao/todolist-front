@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Card, List, Quadro, User } from '../../interfaces/todo-list.interface';
+import { Card, List, Quadro } from '../../interfaces/todo-list.interface';
 import { MoreSvg } from '../svg/more';
 import { QuadroSvg } from '../svg/quadro';
 import { ButtonGreen } from '../buttons/buttonGreen';
@@ -7,58 +7,34 @@ import { ButtonRed } from '../buttons/buttonRed';
 import { useChangeInput } from '../../util/hooks/useChangeInput';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
 import { useStopPropagation } from '../../util/hooks/useStopPropagation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../services/redux/root-reducer';
 import { ContainerCard } from './list-container';
-import { ListService } from '../../services/api/listService';
-import { getAllList, filterList } from '../../services/redux/list/actions';
+import { TasksListsRequests } from '../../util/functions/requests/tasksListsRequests';
 
 export const BodyContainer = () => {
-  const userInfo: User = useSelector((state: RootState) => state.UserReducer);
-  const frameInfo = useSelector((state: RootState) => state.frameReducer);
-  const cardsInfo = useSelector((state: RootState) => state.CardReducer);
   const listInfo = useSelector((state: RootState) => state.ListReducer);
+  const { selectedFrame, frames } = useSelector(
+    (state: RootState) => state.frameReducer,
+  );
+  const { cards } = useSelector((state: RootState) => state.CardReducer);
+  const { input, handleInput } = useChangeInput({ createList: '' });
+
+  const { createList } = TasksListsRequests();
 
   const [addInput, setAddInput] = useState(false);
-  const { input, handleInput } = useChangeInput({ name: '' });
 
-  const handleAddButton = () => setAddInput(!addInput);
-
-  const listService = new ListService();
-  const dispatch = useDispatch();
+  const filtredList = listInfo.filterList;
   const refInput = useRef(null);
 
-  const selectedFrame = frameInfo.selectedFrame;
-  const frames: Quadro[] = frameInfo.frames;
-  const filtredList = listInfo.filterList;
-  const cards: Card[] = cardsInfo.cards;
-
   useClickOutside({ ref: refInput, callback: () => handleAddButton() });
-
-  const handleCreateList = async ({ id }: Quadro) => {
-    if (input.name === '' || !id) return;
-
-    try {
-      await listService.createList(input.name, id);
-      const newLists = await listService.getAllList(userInfo.id);
-
-      input.name = '';
-      setAddInput(false);
-
-      if (newLists) {
-        dispatch(getAllList(newLists));
-        dispatch(filterList(id));
-      }
-    } catch (error) {
-      console.error('Error creating List', error);
-    }
-  };
+  const handleAddButton = () => setAddInput(!addInput);
 
   return (
     <>
       {selectedFrame ? (
         frames.map(
-          (frame) =>
+          (frame: Quadro) =>
             frame.id === selectedFrame && (
               <div
                 key={frame.id}
@@ -85,23 +61,26 @@ export const BodyContainer = () => {
                       ref={refInput}
                     >
                       <input
-                        value={input.name}
-                        onChange={handleInput('name')}
+                        onChange={handleInput('createList')}
                         type="text"
                         name="name"
                         id="name"
-                        placeholder="Nova Lista"
                         className="overflow-hidden
-                     resize-none text-sm rounded-lg outline-none p-2 
-                     bg-BlackTheme-list drop-shadow-lg text-gray-400
-                     border border-gray-400 w-full"
+                        resize-none text-sm rounded-lg outline-none p-2 
+                        bg-BlackTheme-list drop-shadow-lg text-gray-400
+                        border border-gray-400 w-full"
                         onClick={useStopPropagation().stopPropagation}
                       />
                       <div className="flex w-full gap-2">
                         <ButtonGreen
                           children="Criar"
                           buttonProps={{
-                            onClick: () => handleCreateList({ id: frame.id }),
+                            onClick: () =>
+                              createList({
+                                id: selectedFrame,
+                                input: input,
+                                clearButton: setAddInput,
+                              }),
                           }}
                         />
                         <ButtonRed
@@ -122,7 +101,7 @@ export const BodyContainer = () => {
                         key={list.id}
                         list={list}
                         cards={cards.filter(
-                          (card) => card.activitiesListId === list.id,
+                          (card: Card) => card.activitiesListId === list.id,
                         )}
                       />
                     ))
