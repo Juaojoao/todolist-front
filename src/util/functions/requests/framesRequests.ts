@@ -14,6 +14,7 @@ interface FramesRequests {
   input?: inputs;
   clearButton?: any;
   setState?: any;
+  order?: number;
 }
 
 interface inputs {
@@ -96,5 +97,22 @@ export const FramesRequests = () => {
     setState(id);
   };
 
-  return { createFrame, updateFrame, deleteFrame, handleSetSelectedFrame };
+  const orderFrame = async ({ id, order }: FramesRequests) => {
+    if (!id || !order) return;
+
+    try {
+      await frameService.orderFrame(id, order);
+    } catch (error) {
+      console.log(error);
+      setMessage({ type: 'error', message: 'Erro ao ordenar quadro!' });
+    }
+  };
+
+  return {
+    createFrame,
+    updateFrame,
+    deleteFrame,
+    handleSetSelectedFrame,
+    orderFrame,
+  };
 };

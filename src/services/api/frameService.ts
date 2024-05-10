@@ -51,4 +51,17 @@ export class FrameService {
       console.error('Error deleting Frame', error);
     }
   }
+
+  async orderFrame(frameId: number, order: number) {
+    if (!frameId || !order || !this.token) return;
+
+    console.log('id', frameId, 'order', order);
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.put(`/frame/order/${frameId}`, { order });
+    } catch (error) {
+      console.error('Error ordering Frame', error);
+    }
+  }
 }
