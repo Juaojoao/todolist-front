@@ -55,8 +55,6 @@ export class FrameService {
   async orderFrame(frameId: number, order: number) {
     if (!frameId || !order || !this.token) return;
 
-    console.log('id', frameId, 'order', order);
-
     try {
       getAuthorizationToken(this.token);
       await this.api.put(`/frame/order/${frameId}`, { order });

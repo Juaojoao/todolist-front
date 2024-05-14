@@ -30,8 +30,6 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
     updateCardDescription: '',
   });
 
-  // console.log(input);
-
   const cards = useSelector((state: RootState) => state.CardReducer.cards);
   const taskListInfo = useSelector(
     (state: RootState) => state.TaskListReducer.taskList,

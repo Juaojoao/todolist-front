@@ -51,4 +51,15 @@ export class ListService {
       console.error('Error updating List', error);
     }
   }
+
+  async orderList(id: number, order: number) {
+    if (!id || !order || !this.token) return;
+
+    try {
+      getAuthorizationToken(this.token);
+      await this.api.put(`/activitieslist/order/${id}`, { order });
+    } catch (error) {
+      console.error('Error ordering List', error);
+    }
+  }
 }

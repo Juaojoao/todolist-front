@@ -12,6 +12,7 @@ interface Quadro {
   name?: string;
   activitiesList?: List[];
   userId?: number;
+  order?: number;
 }
 
 interface List {
@@ -19,6 +20,7 @@ interface List {
   name?: string;
   cards?: Card[];
   frameId?: number;
+  order?: number;
 }
 
 interface Card {
@@ -28,6 +30,7 @@ interface Card {
   createdAt?: string;
   tasklist?: taskList[];
   activitiesListId?: number;
+  order?: number;
 }
 
 interface taskList {
@@ -35,6 +38,7 @@ interface taskList {
   name?: string;
   cardId?: number;
   tasks?: Tasks[];
+  order?: number;
 }
 
 interface Tasks {
@@ -42,6 +46,7 @@ interface Tasks {
   name?: string;
   status?: boolean;
   taskListId?: number;
+  order?: number;
 }
 
 export type { User, Quadro, List, Card, Tasks, taskList };

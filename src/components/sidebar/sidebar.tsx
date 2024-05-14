@@ -1,5 +1,5 @@
 import './style.css';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { MoreSvg } from '../svg/more';
 import { QuadroSvg } from '../svg/quadro';
 import { ExitIcon } from '../svg/exit';
@@ -16,24 +16,24 @@ import { FramesRequests } from '../../util/functions/requests/framesRequests';
 import { InputConditionComp } from '../inputs/inputCondition';
 import { ModalComponent } from '../modal/modalAlert';
 import { useClickOutside } from '../../util/hooks/useClickOutside';
-import { useDragAndDrop } from '../../util/hooks/useDragAndDrop';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { FrameService } from '../../services/api/frameService';
+import { useDispatch } from 'react-redux';
+import { getAllFrames } from '../../services/redux/frame/actions';
+import { updateDataOrder } from '../../util/functions/validateDND';
 
 export const Sidebar = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
   const frames: Quadro[] = useSelector(
     (state: RootState) => state.frameReducer.frames,
   );
-  const { data, handleDragEnd, setData } = useDragAndDrop({
-    initialData: frames,
-  });
   const { input, handleInput } = useChangeInput({
     createFrame: '',
     updateFrame: '',
   });
+  const frameService = new FrameService();
+  const dispatch = useDispatch();
   const { logout } = useAuth();
-
-  console.log(data);
 
   const {
     createFrame,
@@ -42,10 +42,6 @@ export const Sidebar = () => {
     handleSetSelectedFrame,
     orderFrame,
   } = FramesRequests();
-
-  useEffect(() => {
-    setData(frames);
-  }, [frames]);
 
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
@@ -75,15 +71,31 @@ export const Sidebar = () => {
     setEditingProjectId(id);
   };
 
-  const handleDragEndWithContext = (result: any) => {
-    handleDragEnd(result);
+  const handleDragEndWithContext = async (result: any) => {
+    const { source, destination } = result;
+
+    const draggedItem = frames[source.index];
+    const newPosition = destination.index + 1;
 
     if (result.destination) {
-      const { source, destination } = result;
-      const draggedItem = data[source.index];
-      const newPosition = destination.index + 1;
+      if (source.index === destination.index) return;
 
-      orderFrame({ id: draggedItem.id, order: newPosition });
+      const existingItem = frames.find(
+        (item: Quadro) => item.order === newPosition,
+      );
+
+      if (existingItem) {
+        const updatedData = updateDataOrder(frames, draggedItem, newPosition);
+
+        await Promise.all(
+          updatedData.map((item: Quadro) =>
+            orderFrame({ id: item.id, order: item.order }),
+          ),
+        );
+
+        const newFrames = await frameService.getAllFrames(userInfo.id);
+        if (newFrames) dispatch(getAllFrames(newFrames));
+      }
     }
   };
 
@@ -112,7 +124,7 @@ export const Sidebar = () => {
                 className={`z-20 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
               >
                 <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
-                  <h1>{userInfo.name}</h1>
+                  <h1>{userInfo?.name}</h1>
                   <button onClick={handleAddButton}>
                     <MoreSvg />
                   </button>
@@ -146,7 +158,7 @@ export const Sidebar = () => {
                         ref={provided.innerRef}
                         className="frame-list"
                       >
-                        {data.map((quadro: Quadro, index: number) => (
+                        {frames.map((quadro: Quadro, index: number) => (
                           <Draggable
                             key={quadro?.id?.toString()}
                             draggableId={quadro?.id?.toString() || ''}

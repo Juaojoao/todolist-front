@@ -11,6 +11,7 @@ interface ActivitiesListsRequests {
   clearButton?: any;
   selectedFrame?: number;
   setState?: any;
+  order?: number;
 }
 
 interface inputs {
@@ -102,5 +103,16 @@ export const ActivitiesListsRequests = () => {
     }
   };
 
-  return { createList, updateList, deleteList };
+  const orderList = async ({ id, order }: ActivitiesListsRequests) => {
+    if (!id || !order) return;
+
+    try {
+      await listService.orderList(id, order);
+    } catch (error) {
+      console.log(error);
+      setMessage({ type: 'error', message: 'Erro ao ordenar Lista!' });
+    }
+  };
+
+  return { createList, updateList, deleteList, orderList };
 };
