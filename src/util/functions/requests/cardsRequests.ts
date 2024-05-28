@@ -16,6 +16,7 @@ interface CardsRequest {
   selectedFrame?: number;
   setState?: any;
   description?: string;
+  order: number;
 }
 
 interface inputs {
@@ -34,6 +35,7 @@ export const CardsRequest = () => {
     activitiesListId,
     input,
     clearButton,
+    order,
   }: CardsRequest) => {
     if (!input?.createCard || !activitiesListId) {
       return setMessage({
@@ -46,6 +48,7 @@ export const CardsRequest = () => {
       await cardService.createCard({
         activitiesListId,
         name: input?.createCard,
+        order,
       });
       setMessage({ type: 'success', message: 'Cartão criado com sucesso!' });
 
@@ -151,11 +154,26 @@ export const CardsRequest = () => {
     }
   };
 
+  const orderCard = async ({ id, order, activitiesListId }: CardsRequest) => {
+    if (!id) return;
+
+    try {
+      await cardService.updateCard({
+        id,
+        activitiesListId,
+        order,
+      });
+    } catch (error) {
+      setMessage({ type: 'error', message: 'Erro ao atualizar cartão!' });
+    }
+  };
+
   return {
     createCard,
     updateCard,
     deleteCard,
     selectCard,
     updateCardDescrition,
+    orderCard,
   };
 };

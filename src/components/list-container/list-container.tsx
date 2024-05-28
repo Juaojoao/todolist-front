@@ -11,6 +11,10 @@ import { TreshSvg } from '../svg/tresh';
 import { ActivitiesListsRequests } from '../../util/functions/requests/activitiesListsRequests';
 import { CardsRequest } from '../../util/functions/requests/cardsRequests';
 import { InputConditionComp } from '../inputs/inputCondition';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { CardService } from '../../services/api/cardService';
+import { getAllCards } from '../../services/redux/card/actions';
+import { useDispatch } from 'react-redux';
 
 type ContainerCardProps = {
   cards: Card[];
@@ -18,11 +22,12 @@ type ContainerCardProps = {
 };
 
 export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
+  const userInfo = useSelector((state: RootState) => state.UserReducer);
   const frameInfo = useSelector((state: RootState) => state.frameReducer);
   const selectedFrame: number = frameInfo.selectedFrame;
 
   const { deleteList, updateList } = ActivitiesListsRequests();
-  const { createCard } = CardsRequest();
+  const { createCard, orderCard } = CardsRequest();
 
   const [addInputEdit, setAddInputEdit] = useState(false);
   const [addInput, setAddInput] = useState(false);
@@ -34,6 +39,47 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   const handleaddInputEdit = () => setAddInputEdit(!addInputEdit);
   const handleAddInput = () => setAddInput(!addInput);
 
+  const cardService = new CardService();
+  const dispatch = useDispatch();
+
+  const handleDragEndWithContext = async (result: any) => {
+    const { source, destination } = result;
+
+    if (!destination) return;
+    if (source.index === destination.index) return;
+
+    // Reordena as listas localmente
+    const reorderedList = Array.from(cards);
+    const [movedList] = reorderedList.splice(source.index, 1);
+    reorderedList.splice(destination.index, 0, movedList);
+
+    // Atualiza a ordem com base na nova posição
+    const updatedListInfo = reorderedList.map((card, index) => ({
+      id: card.id,
+      order: index + 1,
+    }));
+
+    try {
+      await Promise.all(
+        updatedListInfo.map((card) => {
+          if (!card.id) return;
+          return orderCard({
+            id: card.id,
+            order: card.order,
+            activitiesListId: list.id,
+          });
+        }),
+      );
+
+      const newCards = await cardService.getAllCard(userInfo.id);
+
+      if (newCards) {
+        dispatch(getAllCards(newCards));
+      }
+    } catch (error) {
+      console.error('Error updating List', error);
+    }
+  };
   return (
     <li className="w-72 h-full self-start flex-shrink-0">
       <div
@@ -74,14 +120,39 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
             </DropDownButton>
           </InputConditionComp>
         </div>
-
-        <div className="shadow flex flex-col p-2 gap-3 items-center overflow-y-auto drop-shadow-xl">
-          {cards?.length > 0 ? (
-            cards.map((card) => <CardTodo card={card} key={card.id} />)
-          ) : (
-            <span className="text-sm text-gray-400">Sem cartões..</span>
-          )}
-        </div>
+        <DragDropContext onDragEnd={handleDragEndWithContext}>
+          <Droppable droppableId="droppable-list" direction="vertical">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                <div>
+                  {cards?.length > 0 ? (
+                    cards.map((card: Card, index: number) => (
+                      <Draggable
+                        key={card.id}
+                        draggableId={card.id?.toString() || ''}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            ref={provided.innerRef}
+                            className="shadow flex flex-col p-2 gap-3 items-center drop-shadow-xl"
+                          >
+                            <CardTodo key={card.id} card={card} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  ) : (
+                    <span className="text-sm text-gray-400">Sem cartões..</span>
+                  )}
+                </div>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
 
         <InputConditionComp
           condition={addInput}
@@ -92,6 +163,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
               activitiesListId: list.id,
               clearButton: setAddInput,
               input,
+              order: cards.length + 1,
             })
           }
           valueId={list.id}

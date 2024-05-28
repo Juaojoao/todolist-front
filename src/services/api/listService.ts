@@ -20,11 +20,11 @@ export class ListService {
     }
   }
 
-  async createList(name: string, frameId: number) {
+  async createList(name: string, frameId: number, order?: number) {
     if (!name || !frameId || !this.token) return;
     try {
       getAuthorizationToken(this.token);
-      await this.api.post('/activitieslist/create', { name, frameId });
+      await this.api.post('/activitieslist/create', { name, frameId, order });
     } catch (error) {
       console.error('Error creating List', error);
     }

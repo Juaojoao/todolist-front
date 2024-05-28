@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setToken(null);
     localStorage.removeItem('token');
-    setMessage({ type: 'success', message: 'Logout efetuado com Sucesso!' });
     navigate('/');
   };
 

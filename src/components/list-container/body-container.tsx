@@ -9,15 +9,12 @@ import { ContainerCard } from './list-container';
 import { ActivitiesListsRequests } from '../../util/functions/requests/activitiesListsRequests';
 import { InputConditionComp } from '../inputs/inputCondition';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-// import { updateDataOrder } from '../../util/functions/validateDND';
-// import { ListService } from '../../services/api/listService';
-// import { useDispatch } from 'react-redux';
-// import { getAllList } from '../../services/redux/list/actions';
+import { ListService } from '../../services/api/listService';
+import { useDispatch } from 'react-redux';
+import { filterList, getAllList } from '../../services/redux/list/actions';
 
 export const BodyContainer = () => {
-  // Falta Lógica de arrastar e soltar incrementar e decrementar a ordem das listas
-
-  // const userInfo: User = useSelector((state: RootState) => state.UserReducer);
+  const userInfo: User = useSelector((state: RootState) => state.UserReducer);
   const cards = useSelector((state: RootState) => state.CardReducer.cards);
   const listInfo = useSelector((state: RootState) => state.ListReducer);
 
@@ -30,42 +27,44 @@ export const BodyContainer = () => {
   const [addInput, setAddInput] = useState(false);
 
   const filtredList = listInfo.filterList;
-  // const listService = new ListService();
-  // const dispatch = useDispatch();
+  const listService = new ListService();
+  const dispatch = useDispatch();
 
   const handleAddButton = () => setAddInput(!addInput);
 
   const handleDragEndWithContext = async (result: any) => {
     const { source, destination } = result;
 
-    // const draggedItem = filtredList[source.index];
-    // const newPosition = destination.index + 1;
+    if (!destination) return;
+    if (source.index === destination.index) return;
 
-    if (result.destination) {
-      if (source.index === destination.index) return;
+    // Reordena as listas localmente
+    const reorderedList = Array.from(filtredList);
+    const [movedList] = reorderedList.splice(source.index, 1);
+    reorderedList.splice(destination.index, 0, movedList);
 
-      // const existingItem = filtredList.find(
-      //   (item: List) => item.order === newPosition,
-      // );
+    // Atualiza a ordem com base na nova posição
+    const updatedListInfo = reorderedList.map((list, index) => ({
+      id: list.id,
+      order: index + 1,
+    }));
 
-      // if (existingItem) {
-      //   const updatedData = updateDataOrder(
-      //     filtredList,
-      //     draggedItem,
-      //     newPosition,
-      //   );
+    try {
+      await Promise.all(
+        updatedListInfo.map((list) => {
+          if (!list.id) return;
+          return listService.orderList(list.id, list.order);
+        }),
+      );
 
-      //   if (!updatedData) return;
-      //   console.log(updatedData);
-      //   await Promise.all(
-      //     updatedData.map((item: List) =>
-      //       orderList({ id: item.id, order: item.order }),
-      //     ),
-      //   );
+      const newLists = await listService.getAllList(userInfo.id);
 
-      //   const newLists = await listService.getAllList(userInfo.id);
-      //   if (newLists) dispatch(getAllList(newLists));
-      // }
+      if (newLists) {
+        dispatch(getAllList(newLists));
+        dispatch(filterList(selectedFrame));
+      }
+    } catch (error) {
+      console.error('Error updating List', error);
     }
   };
 
@@ -93,6 +92,7 @@ export const BodyContainer = () => {
                         id: selectedFrame,
                         input: input,
                         clearButton: setAddInput,
+                        order: filtredList.length + 1,
                       })
                     }
                     funcChange={handleInput('createList')}
@@ -119,33 +119,34 @@ export const BodyContainer = () => {
                           <div
                             {...provided.droppableProps}
                             ref={provided.innerRef}
-                            className="pb-2 flex flex-wrap gap-4 w-full"
                           >
-                            {filtredList.map((list: List, index: number) => (
-                              <Draggable
-                                key={list.id}
-                                draggableId={list.id?.toString() || ''}
-                                index={index}
-                              >
-                                {(provided) => (
-                                  <div
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    ref={provided.innerRef}
-                                  >
-                                    <ContainerCard
-                                      key={list.id}
-                                      list={list}
-                                      cards={cards.filter(
-                                        (card: Card) =>
-                                          card.activitiesListId === list.id,
-                                      )}
-                                    />
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
+                            <div className="pb-2 flex flex-nowrap gap-4 w-full">
+                              {filtredList.map((list: List, index: number) => (
+                                <Draggable
+                                  key={list.id}
+                                  draggableId={list.id?.toString() || ''}
+                                  index={index}
+                                >
+                                  {(provided) => (
+                                    <div
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      ref={provided.innerRef}
+                                    >
+                                      <ContainerCard
+                                        key={list.id}
+                                        list={list}
+                                        cards={cards.filter(
+                                          (card: Card) =>
+                                            card.activitiesListId === list.id,
+                                        )}
+                                      />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
                           </div>
                         )}
                       </Droppable>

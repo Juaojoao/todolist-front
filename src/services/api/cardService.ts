@@ -20,7 +20,7 @@ export class CardService {
     }
   }
 
-  async createCard({ activitiesListId, name, description }: Card) {
+  async createCard({ activitiesListId, name, description, order }: Card) {
     if (!this.token || !activitiesListId || name === '') return;
 
     try {
@@ -29,18 +29,24 @@ export class CardService {
         activitiesListId,
         name,
         description,
+        order,
       });
     } catch (error) {
       console.error('Error creating Card', error);
     }
   }
 
-  async updateCard({ id, name, description }: Card) {
-    if (!this.token || name === '' || !id) return;
+  async updateCard({ id, name, description, order }: Card) {
+    if (!this.token || !id) return;
 
     try {
       getAuthorizationToken(this.token);
-      await this.api.patch(`/card/update/${id}`, { id, name, description });
+      await this.api.patch(`/card/update/${id}`, {
+        id,
+        name,
+        description,
+        order,
+      });
     } catch (error) {
       console.error('Error updating Card', error);
     }

@@ -29,13 +29,14 @@ export const ActivitiesListsRequests = () => {
     id,
     input,
     clearButton,
+    order,
   }: ActivitiesListsRequests) => {
     if (!input?.createList || !id) {
       return setMessage({ type: 'warning', message: 'Campo vazio!' });
     }
 
     try {
-      await listService.createList(input.createList, id);
+      await listService.createList(input.createList, id, order);
       setMessage({ type: 'success', message: 'Lista criada com sucesso!' });
 
       input.createList = '';
