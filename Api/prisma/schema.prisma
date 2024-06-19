@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  frames    Frame[]
+
+  @@map("users")
+}
+
+model Frame {
+  id             Int              @id @default(autoincrement())
+  name           String
+  order          Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  User           User?            @relation(fields: [userId], references: [id])
+  userId         Int?
+  activitiesList ActivitiesList[]
+
+  @@map("frames")
+}
+
+model ActivitiesList {
+  id        Int      @id @default(autoincrement())
+  name      String
+  order     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Frame     Frame?   @relation(fields: [frameId], references: [id])
+  frameId   Int?
+  cards     Card[]
+
+  @@map("activities_lists")
+}
+
+model Card {
+  id               Int             @id @default(autoincrement())
+  name             String
+  description      String?
+  order            Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  ActivitiesList   ActivitiesList? @relation(fields: [activitiesListId], references: [id])
+  activitiesListId Int?
+  tasklist         TaskList[]
+
+  @@map("cards")
+}
+
+model TaskList {
+  id        Int      @id @default(autoincrement())
+  name      String
+  order     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Card      Card?    @relation(fields: [cardId], references: [id])
+  cardId    Int?
+  tasks     Task[]
+
+  @@map("task_lists")
+}
+
+model Task {
+  id         Int       @id @default(autoincrement())
+  status     Boolean   @default(false)
+  name       String
+  order      Int?
+  TaskList   TaskList? @relation(fields: [taskListId], references: [id])
+  taskListId Int?
+
+  @@map("tasks")
+}

@@ -1,0 +1,20 @@
+{
+  "name": "trello-da-shopee",
+  "private": true,
+  "workspaces": [
+    "client",
+    "api"
+  ],
+  "version": "1.0.0",
+  "scripts": {
+    "start:client": "npm --workspace client run dev",
+    "start:api": "npm --workspace api run start:dev",
+    "start": "concurrently \"npm run start:client\" \"npm run start:api\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  }
+}
