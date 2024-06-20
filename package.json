@@ -8,8 +8,18 @@
   "version": "1.0.0",
   "scripts": {
     "start:client": "npm --workspace client run dev",
+    "build:client": "npm --workspace client run build",
+    "prod:client": "npm --workspace client run preview",
     "start:api": "npm --workspace api run start:dev",
-    "start": "concurrently \"npm run start:client\" \"npm run start:api\""
+    "build:api": "npm --workspace api run build",
+    "format:api": "npm --workspace api run format",
+    "prod:api": "npm --workspace api run start:prod",
+    "debug:api": "npm --workspace api run start:debug",
+    "start:dev": "concurrently \"npm run start:client\" \"npm run start:api\"",
+    "build": "concurrently \"npm run build:client\" \"npm run build:api\"",
+    "start:prod": "concurrently \" npm run prod:client \" \" npm run prod:api \"",
+    "prisma:migrate:dev": "npm --workspace api run prisma:migrate:dev",
+    "prisma:migrate:deploy": "npm --workspace api run prisma:migrate:deploy"
   },
   "keywords": [],
   "author": "",

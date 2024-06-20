@@ -16,7 +16,7 @@ interface CardsRequest {
   selectedFrame?: number;
   setState?: any;
   description?: string;
-  order: number;
+  order?: number;
 }
 
 interface inputs {
