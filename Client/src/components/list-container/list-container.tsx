@@ -82,7 +82,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
   };
   return (
     <>
-      <div className="p-3 bg-BlackTheme-list rounded-xl border-collapse border-2 border-gray-900">
+      <div className="basis-[200px] w-[200px] md:basis-[272px] md:w-[272px] p-3 bg-BlackTheme-list rounded-xl border-collapse border-2 border-gray-900">
         <div className="list-top flex justify-between items-center px-3">
           <InputConditionComp
             condition={addInputEdit}

@@ -34,17 +34,16 @@
     display: flex;
     position: relative;
     box-sizing: border-box;
-    flex-basis: 272px;
     flex-direction: column;
     flex-grow: 0;
     flex-shrink: 0;
     align-self: start;
     justify-content: space-between;
-    width: 272px;
     max-height: 100%;
     padding-bottom: 8px;
     border-radius: 12px;
     vertical-align: top;
     white-space: normal;
     scroll-margin: 8px;
+    -webkit-overflow-scrolling: touch;
 }

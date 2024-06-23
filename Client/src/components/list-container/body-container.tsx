@@ -77,7 +77,7 @@ export const BodyContainer = () => {
           (frame: Quadro) =>
             frame.id === selectedFrame && (
               <div key={frame.id} className="h-full flex flex-col">
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:justify-start justify-center flex-col">
                   <div className="flex gap-2 items-center">
                     <QuadroSvg />
                     <p>{frame.name}</p>
@@ -131,7 +131,7 @@ export const BodyContainer = () => {
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                     ref={provided.innerRef}
-                                    className="w-72 self-start flex-shrink-0"
+                                    className="self-start flex-shrink-0"
                                   >
                                     <ContainerCard
                                       key={list.id}

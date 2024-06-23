@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const login = async (email: string, password: string) => {
+    console.log(email, password);
     try {
       const response = await connectionAPI.post('/auth/login', {
         email,

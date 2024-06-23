@@ -47,9 +47,12 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
 
   return (
     <section className="w-screen">
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center py-10">
-        <div className="bg-BlackTheme-aside w-2/4 p-4 rounded-lg relative shadow-lg flex flex-col h-full overflow-y-auto gap-10">
-          <div className="show-card-header flex text-gray-800 gap-2 items-center justify-between">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-2 md:py-10">
+        <div className="bg-BlackTheme-aside w-full md:w-2/4 p-4 rounded-lg relative shadow-lg flex flex-col h-full overflow-y-auto gap-10">
+          <div
+            className="show-card-header flex text-gray-800 gap-2 items-center justify-between fixed md:static w-[96%]
+           md:w-auto top-0 left-0 p-5 bg-BlackTheme-aside z-10 m-2 md:m-0 shadow-xl md:shadow-none"
+          >
             <div className="flex text-gray-800 gap-2 items-center">
               <TrelloSvg />
               <h3 className="text-xl text-gray-600 font-bold font-sans">
@@ -58,7 +61,7 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
             </div>
             <CloseIcon onClick={() => dispatch(unsetSelectedCard())} />
           </div>
-          <div className="description">
+          <div className="description mt-20 md:mt-0">
             <div className={`flex gap-2 flex-col`}>
               <div className="flex items-center gap-2">
                 <DescriptionSvg />
@@ -97,7 +100,9 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
           </div>
 
           <div className="task-list text-gray-600 font-bold font-sans flex flex-col gap-2">
-            <div className="task-list-header flex justify-between items-center mb-4">
+            <div
+              className={`task-list-header flex justify-between items-center mb-4 ${addButtonStates ? 'flex-col md:flex-row' : ''}`}
+            >
               <span className="text-sm w-full">Tarefas:</span>
               <InputConditionComp
                 funcCancel={() => setAddButtonStates(false)}
@@ -120,8 +125,8 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
                   onClick={handleClickAddButton}
                   className="text-sm bg-BlackTheme-roudend p-1 rounded-md
                   hover:text-green-700 transition-all duration-150 
-                  border-2 border-gray-700 hover:border-green-700 mt-4 
-                  flex gap-2 items-center w-1/2 justify-center"
+                  border-2 border-gray-700 hover:border-green-700
+                  flex gap-0 md:gap-2 items-center w-full md:w-1/2 justify-center"
                 >
                   <MoreSvg />
                   NOVA LISTA

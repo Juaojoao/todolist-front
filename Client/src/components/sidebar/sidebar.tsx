@@ -50,7 +50,7 @@ export const Sidebar = () => {
 
   const transitions = useTransition(open, {
     from: { opacity: 0, transform: 'translateX(-100%)' },
-    enter: { opacity: 1, transform: 'translateX(35%)' },
+    enter: { opacity: 1, transform: 'translateX(20%)' },
     leave: { opacity: 0, transform: 'translateX(-100%)' },
   });
 
@@ -108,7 +108,7 @@ export const Sidebar = () => {
 
   return (
     <div className="sidebar flex relative">
-      <aside className="bg-BlackTheme-aside px-6 pt-6 z-20">
+      <aside className="bg-BlackTheme-aside px-1 pt-6 z-20">
         <div className="flex center justify-center flex-col gap-2">
           <button
             onClick={handleClick}
@@ -128,7 +128,7 @@ export const Sidebar = () => {
               <animated.div
                 ref={sidebarRef}
                 style={style}
-                className={`z-20 absolute overflow-x-hidden sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
+                className={`z-20 absolute overflow-x-hiddenx' sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
               >
                 <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
                   <h1>{userInfo?.name}</h1>
