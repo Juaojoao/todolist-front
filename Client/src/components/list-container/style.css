@@ -1,0 +1,50 @@
+.board-canvas {
+    flex-grow: 1;
+    margin-top: 12px;
+    position: relative;
+}
+
+#board {
+    bottom: 0;
+    left: 0;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    padding-top: 2px;
+    position: absolute;
+    right: 0;
+    scrollbar-width: auto;
+    top: -2px;
+    -webkit-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+#board li {
+    display: block;
+    flex-shrink: 0;
+    align-self: flex-start;
+    padding: 0 6px;
+    height: 100%;
+    white-space: nowrap;
+}
+
+#board li > div {
+    display: flex;
+    position: relative;
+    box-sizing: border-box;
+    flex-basis: 272px;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 0;
+    align-self: start;
+    justify-content: space-between;
+    width: 272px;
+    max-height: 100%;
+    padding-bottom: 8px;
+    border-radius: 12px;
+    vertical-align: top;
+    white-space: normal;
+    scroll-margin: 8px;
+}

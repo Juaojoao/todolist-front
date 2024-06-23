@@ -30,13 +30,13 @@ export const FramesRequests = () => {
 
   const { setMessage } = useMessage();
 
-  const createFrame = async ({ input, clearButton }: FramesRequests) => {
+  const createFrame = async ({ input, clearButton, order }: FramesRequests) => {
     if (!input?.createFrame || !userInfo) {
       return setMessage({ type: 'warning', message: 'Campo vazio!' });
     }
 
     try {
-      await frameService.createFrame(userInfo.id, input.createFrame);
+      await frameService.createFrame(userInfo.id, input.createFrame, order);
       setMessage({ type: 'success', message: 'Quadro criado com sucesso!' });
 
       input.createFrame = '';

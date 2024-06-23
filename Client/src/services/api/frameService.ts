@@ -9,12 +9,12 @@ export class FrameService {
   private api = connectionAPI;
   private token = getTokenFromLocalStorage();
 
-  async createFrame(userId?: number, name?: string) {
+  async createFrame(userId?: number, name?: string, order?: number) {
     if (!userId || !name || !this.token) return;
     const UserId = Number(userId);
     try {
       getAuthorizationToken(this.token);
-      await this.api.post('frame/create', { userId: UserId, name: name });
+      await this.api.post('frame/create', { userId: UserId, name: name, order });
     } catch (error) {
       console.error('Error creating Frame', error);
     }

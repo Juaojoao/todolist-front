@@ -63,7 +63,7 @@ export const ListTodo = () => {
       <Sidebar />
       <div className="project-box p-4 w-full flex flex-col overflow-x-hidden">
         <HeaderTodo />
-        <div className="overflow-hidden h-full relative">
+        <div className="overflow-hidden h-full relative board-main-content">
           {selectedCard && <ModalCardComp cardSelected={selectedCard} />}
           <BodyContainer />
         </div>

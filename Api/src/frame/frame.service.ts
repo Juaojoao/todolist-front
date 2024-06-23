@@ -6,7 +6,7 @@ import { CreateFrameDto } from './dto/create-frame.dto';
 export class FrameService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create({ userId, name }: CreateFrameDto) {
+  async create({ userId, name, order }: CreateFrameDto) {
     if (!userId) {
       return { message: 'User does not exist' };
     }
@@ -19,7 +19,7 @@ export class FrameService {
       return { message: 'User does not exist' };
     }
     await this.prisma.frame.create({
-      data: { userId, name },
+      data: { userId, name, order },
     });
 
     return 'Frame created successfully';

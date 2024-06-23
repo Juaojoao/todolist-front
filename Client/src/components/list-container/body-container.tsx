@@ -1,3 +1,4 @@
+import './style.css';
 import { useState } from 'react';
 import { Card, List, Quadro, User } from '../../interfaces/todo-list.interface';
 import { MoreSvg } from '../svg/more';
@@ -75,12 +76,9 @@ export const BodyContainer = () => {
         frames.map(
           (frame: Quadro) =>
             frame.id === selectedFrame && (
-              <div
-                key={frame.id}
-                className="container-list h-full flex gap-4 flex-col"
-              >
-                <div className="flex gap-3">
-                  <div className="header-quadro flex items-center gap-2">
+              <div key={frame.id} className="h-full flex flex-col">
+                <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <QuadroSvg />
                     <p>{frame.name}</p>
                   </div>
@@ -101,63 +99,63 @@ export const BodyContainer = () => {
                   >
                     <button
                       onClick={handleAddButton}
-                      className="header-addList flex items-center gap-2 "
+                      className="flex gap-2 items-center"
                     >
                       <MoreSvg />
                       <p className="font-semibold text-sm">Adicionar Lista</p>
                     </button>
                   </InputConditionComp>
                 </div>
-                <div className="divisor w-full h-px bg-white" />
-                <DragDropContext onDragEnd={handleDragEndWithContext}>
-                  <ol>
+                <div className="board-canvas">
+                  <DragDropContext onDragEnd={handleDragEndWithContext}>
                     {filtredList.length > 0 ? (
                       <Droppable
                         droppableId="droppable-list"
                         direction="horizontal"
                       >
                         {(provided) => (
-                          <div
+                          <ol
+                            id="board"
                             {...provided.droppableProps}
                             ref={provided.innerRef}
+                            className="board-canvas flex"
                           >
-                            <div className="pb-2 flex flex-nowrap gap-4 w-full">
-                              {filtredList.map((list: List, index: number) => (
-                                <Draggable
-                                  key={list.id}
-                                  draggableId={list.id?.toString() || ''}
-                                  index={index}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      ref={provided.innerRef}
-                                    >
-                                      <ContainerCard
-                                        key={list.id}
-                                        list={list}
-                                        cards={cards.filter(
-                                          (card: Card) =>
-                                            card.activitiesListId === list.id,
-                                        )}
-                                      />
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          </div>
+                            {filtredList.map((list: List, index: number) => (
+                              <Draggable
+                                key={list.id}
+                                draggableId={list.id?.toString() || ''}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <li
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    ref={provided.innerRef}
+                                    className="w-72 self-start flex-shrink-0"
+                                  >
+                                    <ContainerCard
+                                      key={list.id}
+                                      list={list}
+                                      cards={cards.filter(
+                                        (card: Card) =>
+                                          card.activitiesListId === list.id,
+                                      )}
+                                    />
+                                  </li>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </ol>
                         )}
                       </Droppable>
                     ) : (
-                      <div className="flex justify-center items-center max-h-full w-full">
+                      <div className="">
                         <p>Crie uma Lista de atividades para começar!</p>
                       </div>
                     )}
-                  </ol>
-                </DragDropContext>
+                  </DragDropContext>
+                </div>
               </div>
             ),
         )

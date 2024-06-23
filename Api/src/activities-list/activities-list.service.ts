@@ -7,7 +7,7 @@ import { UpdateActivitiesListDto } from './dto/update-activities-list.dto';
 export class ActivitiesListService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create({ name, frameId }: CreateActivitiesListDto) {
+  async create({ name, frameId, order }: CreateActivitiesListDto) {
     const frameIdNumber = Number(frameId);
 
     if (!frameIdNumber) {
@@ -26,6 +26,7 @@ export class ActivitiesListService {
       data: {
         name: name,
         frameId: frameIdNumber,
+        order,
       },
     });
 

@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { ActivitiesListEntity } from '../entities/activities-list.entity';
 
 export class CreateActivitiesListDto extends ActivitiesListEntity {
@@ -6,5 +6,6 @@ export class CreateActivitiesListDto extends ActivitiesListEntity {
   name: string;
 
   @IsNumber()
+  @IsOptional()
   order?: number;
 }

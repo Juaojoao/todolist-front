@@ -20,7 +20,6 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { FrameService } from '../../services/api/frameService';
 import { useDispatch } from 'react-redux';
 import { getAllFrames } from '../../services/redux/frame/actions';
-import { updateDataOrder } from '../../util/functions/validateDND';
 
 export const Sidebar = () => {
   const userInfo: User = useSelector((state: RootState) => state.UserReducer);
@@ -74,28 +73,36 @@ export const Sidebar = () => {
   const handleDragEndWithContext = async (result: any) => {
     const { source, destination } = result;
 
-    const draggedItem = frames[source.index];
-    const newPosition = destination.index + 1;
+    if (!destination) return;
+    if (source.index === destination.index) return;
 
-    if (result.destination) {
-      if (source.index === destination.index) return;
+    const reorderList = Array.from(frames);
+    const [movedList] = reorderList.splice(source.index, 1);
+    reorderList.splice(destination.index, 0, movedList);
 
-      const existingItem = frames.find(
-        (item: Quadro) => item.order === newPosition,
+    const updatedListInfo = reorderList.map((frame, index) => ({
+      id: frame.id,
+      order: index + 1,
+    }));
+
+    try {
+      await Promise.all(
+        updatedListInfo.map((frame) => {
+          if (!frame.id) return;
+          return orderFrame({
+            id: frame.id,
+            order: frame.order,
+          });
+        }),
       );
 
-      if (existingItem) {
-        const updatedData = updateDataOrder(frames, draggedItem, newPosition);
+      const newFrames = await frameService.getAllFrames(userInfo.id);
 
-        await Promise.all(
-          updatedData.map((item: Quadro) =>
-            orderFrame({ id: item.id, order: item.order }),
-          ),
-        );
-
-        const newFrames = await frameService.getAllFrames(userInfo.id);
-        if (newFrames) dispatch(getAllFrames(newFrames));
+      if (newFrames) {
+        dispatch(getAllFrames(newFrames));
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -121,7 +128,7 @@ export const Sidebar = () => {
               <animated.div
                 ref={sidebarRef}
                 style={style}
-                className={`z-20 absolute overflow-auto sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
+                className={`z-20 absolute overflow-x-hidden sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
               >
                 <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
                   <h1>{userInfo?.name}</h1>
@@ -142,6 +149,7 @@ export const Sidebar = () => {
                               createFrame({
                                 input: input,
                                 clearButton: setAddInput,
+                                order: frames.length + 1,
                               })
                             }
                             funcCancel={() => setAddInput(false)}

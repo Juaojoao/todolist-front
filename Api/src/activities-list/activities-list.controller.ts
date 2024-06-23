@@ -15,8 +15,8 @@ export class ActivitiesListController {
   constructor(private readonly activitiesListService: ActivitiesListService) {}
 
   @Post('/create')
-  async create(@Body() { name, frameId }: CreateActivitiesListDto) {
-    return await this.activitiesListService.create({ name, frameId });
+  async create(@Body() { name, frameId, order }: CreateActivitiesListDto) {
+    return await this.activitiesListService.create({ name, frameId, order });
   }
 
   @Put('/update/:id')

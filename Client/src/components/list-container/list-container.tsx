@@ -81,11 +81,8 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
     }
   };
   return (
-    <li className="w-72 h-full self-start flex-shrink-0">
-      <div
-        className="max-h-full drop-shadow-md list-todo bg-BlackTheme-list
-       p-3 flex flex-col gap-3 rounded-xl border-collapse border-2 border-gray-900"
-      >
+    <>
+      <div className="p-3 bg-BlackTheme-list rounded-xl border-collapse border-2 border-gray-900">
         <div className="list-top flex justify-between items-center px-3">
           <InputConditionComp
             condition={addInputEdit}
@@ -123,31 +120,33 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
         <DragDropContext onDragEnd={handleDragEndWithContext}>
           <Droppable droppableId="droppable-list" direction="vertical">
             {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <div>
-                  {cards?.length > 0 ? (
-                    cards.map((card: Card, index: number) => (
-                      <Draggable
-                        key={card.id}
-                        draggableId={card.id?.toString() || ''}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            ref={provided.innerRef}
-                            className="shadow flex flex-col p-2 gap-3 items-center drop-shadow-xl"
-                          >
-                            <CardTodo key={card.id} card={card} />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))
-                  ) : (
-                    <span className="text-sm text-gray-400">Sem cartões..</span>
-                  )}
-                </div>
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="h-full overflow-y-auto"
+              >
+                {cards?.length > 0 ? (
+                  cards.map((card: Card, index: number) => (
+                    <Draggable
+                      key={card.id}
+                      draggableId={card.id?.toString() || ''}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                          className="shadow flex flex-col p-2 gap-3 items-center drop-shadow-xl"
+                        >
+                          <CardTodo key={card.id} card={card} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <span className="text-sm text-gray-400">Sem cartões..</span>
+                )}
                 {provided.placeholder}
               </div>
             )}
@@ -178,6 +177,6 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
           </div>
         </InputConditionComp>
       </div>
-    </li>
+    </>
   );
 };
