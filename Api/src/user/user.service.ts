@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prismaService';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +15,7 @@ export class UserService {
     });
 
     if (userExists) {
-      throw new Error('Email already exists');
+      throw new HttpException('Email já cadastrado', HttpStatus.CONFLICT);
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -29,7 +29,7 @@ export class UserService {
       },
     });
 
-    return 'User created successfully';
+    return { message: 'Usuário criado com sucesso' };
   }
 
   async findAll() {

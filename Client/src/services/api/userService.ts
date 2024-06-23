@@ -28,9 +28,9 @@ export class UserService {
   async createUser({ email, name, password }: User) {
     if (!email || !name || !password) return;
     try {
-      await this.api.post('user/create', { email, name, password });
-    } catch (error) {
-      console.error('Error creating user:', error);
+      return await this.api.post('user/create', { email, name, password });
+    } catch (error: AxiosError | any) {
+      return error.response;
     }
   }
 }
