@@ -14,13 +14,18 @@ import { useEffect, useState } from 'react';
 import { SpinSvg } from '../../components/svg/spin';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { validateLoginInputs } from '../../util/functions/validateLogin';
 import { useMessage } from '../../context/useGlobalContext';
+import { z } from 'zod';
 
 interface FormState {
   email: string;
   password: string;
 }
+
+const LoginSchema = z.object({
+  email: z.string().email('Digite um email válido'),
+  password: z.string().min(6, 'Digite uma senha válida'),
+});
 
 export const LoginPage = () => {
   const [isSubmit, setIsSubmit] = useState<boolean>(false);
@@ -42,35 +47,35 @@ export const LoginPage = () => {
 
   const { input, handleInput } = useChangeInput<FormState>(initialFormState);
   const [isLoad, setIsLoad] = useState<boolean>(false);
-  const [error, setError] =
-    useState<Record<keyof FormState, string>>(initialFormState);
+  const [errors, setErrors] = useState<Partial<FormState>>({});
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoad(true);
 
-    const { isValid, newErrors } = validateLoginInputs(input);
-
-    if (!isValid) {
-      setError(newErrors || initialFormState);
-      setMessage({ type: 'warning', message: 'Campos em branco!' });
-      setIsLoad(false);
-      return;
-    }
-
     try {
+      LoginSchema.parse(input);
       setIsLoad(true);
       await login(input.email, input.password);
+      setIsLoad(false);
       setIsSubmit(true);
-      setIsLoad(false);
-    } catch (error: any) {
-      setIsLoad(false);
-      setMessage({ type: 'error', message: 'Email ou Senha Inválida' });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Partial<FormState> = {};
+        err.errors.forEach((error) => {
+          if (error.path.length > 0) {
+            fieldErrors[error.path[0] as keyof FormState] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+        setMessage({ type: 'warning', message: err.errors[0].message });
+        setIsLoad(false);
+      }
     }
   };
 
   const handleFieldError = (fieldName: keyof FormState) =>
-    error[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : '';
+    errors[fieldName] ? inputErrorStyle : isSubmit ? inputSuceessStyle : '';
 
   return (
     <div className={bodyFormStyle}>

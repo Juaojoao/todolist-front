@@ -3,6 +3,7 @@ import { connectionAPI } from '../services/api/api';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { useMessage } from './useGlobalContext';
+import { AxiosError } from 'axios';
 
 type AuthContextType = {
   token: string | null;
@@ -52,16 +53,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await connectionAPI.post('/auth/login', {
-      email,
-      password,
-    });
-    const token = response.data.access_token;
+    try {
+      const response = await connectionAPI.post('/auth/login', {
+        email,
+        password,
+      });
 
-    setToken(token);
-    localStorage.setItem('token', JSON.stringify(token));
-    setMessage({ type: 'success', message: 'Login efetuado com Sucesso!' });
-    navigate('/dashboard');
+      if (response.status !== 200) {
+        setMessage({ type: 'error', message: 'Email ou senha inválidos' });
+        return;
+      }
+
+      const token = response.data.access_token;
+      setToken(token);
+      localStorage.setItem('token', JSON.stringify(token));
+      setMessage({ type: 'success', message: 'Login efetuado com Sucesso!' });
+      navigate('/dashboard');
+    } catch (error: AxiosError | any) {
+      setMessage({ type: 'error', message: 'Email ou senha inválidos' });
+    }
   };
 
   const logout = () => {
