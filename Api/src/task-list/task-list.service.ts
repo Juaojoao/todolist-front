@@ -12,6 +12,8 @@ export class TaskListService {
   async createTaskList(data: CreateTaskListDto) {
     const cardId = Number(data.cardId);
 
+    console.log(data);
+
     const cardExists = await this.prisma.card.findFirst({
       where: { id: cardId },
     });

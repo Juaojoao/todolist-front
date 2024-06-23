@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Card } from '../../interfaces/todo-list.interface';
+import { Card, taskList } from '../../interfaces/todo-list.interface';
 import { TrelloSvg } from '../svg/trello';
 import { unsetSelectedCard } from '../../services/redux/card/actions';
 import { DescriptionSvg } from '../svg/description';
@@ -31,7 +31,7 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
   });
 
   const cards = useSelector((state: RootState) => state.CardReducer.cards);
-  const taskListInfo = useSelector(
+  const taskListInfo: taskList[] = useSelector(
     (state: RootState) => state.TaskListReducer.taskList,
   );
   const dispatch = useDispatch();
@@ -106,6 +106,10 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
                     cardId: cardInfo?.id,
                     input: input,
                     clearButton: setAddButtonStates,
+                    order:
+                      taskListInfo.filter(
+                        (taskList) => taskList.cardId === cardInfo?.id,
+                      ).length + 1,
                   })
                 }
                 funcChange={handleInput('createTaskList')}

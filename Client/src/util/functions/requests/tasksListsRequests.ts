@@ -10,6 +10,7 @@ interface TasksListsRequests {
   clearButton?: any;
   cardId?: number;
   setState?: any;
+  order?: number;
 }
 
 interface inputs {
@@ -28,6 +29,7 @@ export const TasksListsRequests = () => {
     cardId,
     input,
     clearButton,
+    order,
   }: TasksListsRequests) => {
     if (!cardId || !input?.createTaskList) {
       return setMessage({ type: 'warning', message: 'Campo vazio!' });
@@ -36,6 +38,7 @@ export const TasksListsRequests = () => {
       await taskListService.createTaskList({
         cardId,
         name: input.createTaskList,
+        order,
       });
       setMessage({
         type: 'success',
@@ -105,6 +108,9 @@ export const TasksListsRequests = () => {
       });
     }
   };
+
+  // Hà de se implementar a função abaixo
+  // const orderTaskList = async ({ id, order }: TasksListsRequests) => {};
 
   return { createTaskList, deleteTaskList, updateTaskList };
 };

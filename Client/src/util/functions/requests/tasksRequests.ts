@@ -10,6 +10,7 @@ interface TasksRequest {
   clearButton?: any;
   taskListId?: number;
   status?: boolean;
+  order?: number;
 }
 
 interface inputs {
@@ -28,6 +29,7 @@ export const TaskRequest = () => {
     input,
     taskListId,
     clearButton,
+    order,
   }: TasksRequest) => {
     if (!input?.createTask || !taskListId) {
       return setMessage({
@@ -39,6 +41,7 @@ export const TaskRequest = () => {
       await taskListService.createTask({
         name: input?.createTask,
         taskListId: taskListId,
+        order,
       });
       setMessage({ type: 'success', message: 'Tarefa criada com sucesso!' });
 

@@ -94,6 +94,11 @@ export const TaskList = ({ taskList, cardId }: TaskListProps) => {
                       taskListId: tasksFilter.id,
                       input: input,
                       clearButton: setAddButtonStates,
+                      order:
+                        tasksFilter.tasks &&
+                        tasksFilter.tasks.filter(
+                          (tasks) => tasks.taskListId === tasksFilter.id,
+                        ).length + 1,
                     })
                   }
                   funcCancel={() =>

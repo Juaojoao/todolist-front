@@ -21,6 +21,30 @@ import { UserService } from '../../services/api/userService';
 import { useMessage } from '../../context/useGlobalContext';
 import { useNavigate } from 'react-router-dom';
 
+// Validação com ZOD a ser implementada.
+// import { z } from 'zod';
+
+// const RegisterSchema = z
+//   .object({
+//     name: z.string().min(1, 'Digite um nome válido'),
+//     email: z.string().email('Digite um email válido'),
+//     password: z
+//       .string()
+//       .min(6, 'Sua senha deve ter no mínimo 6 caracteres')
+//       .regex(
+//         /[!@#$%^&*(),.?":{}|<>]/,
+//         'Sua senha deve conter pelo menos um caractere especial',
+//       )
+//       .regex(/[A-Z]/, 'Sua senha deve conter pelo menos uma letra maiúscula')
+//       .regex(/[a-z]/, 'Sua senha deve conter pelo menos uma letra minúscula')
+//       .regex(/[0-9]/, 'Sua senha deve conter pelo menos um número'),
+//     confirmPassword: z.string().min(1, 'Confirme sua senha'),
+//   })
+//   .refine((data) => data.password === data.confirmPassword, {
+//     message: 'As senhas não conferem',
+//     path: ['confirmPassword'],
+//   });
+
 interface FormState {
   name: string;
   email: string;

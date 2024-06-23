@@ -167,7 +167,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
           }
           valueId={list.id}
         >
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col pt-2">
             <button
               onClick={handleAddInput}
               className="rounded-lg flex gap-2 items-center font-bold text-sm hover:bg-gray-800"
