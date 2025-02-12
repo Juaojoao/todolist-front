@@ -7,6 +7,7 @@
   ],
   "version": "1.0.0",
   "scripts": {
+    "install:all": "concurrently \"npm --workspace client install\" \"npm --workspace api install\"",
     "start:client": "npm --workspace client run dev",
     "build:client": "npm --workspace client run build",
     "prod:client": "npm --workspace client run preview",
