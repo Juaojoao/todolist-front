@@ -31,7 +31,6 @@ export const InputConditionComp = ({
   condition,
   children,
   valueId,
-  flexCol,
 }: InputConditionProps) => {
   const ref = useRef(null);
 
@@ -44,7 +43,7 @@ export const InputConditionComp = ({
     <>
       {condition ? (
         <div
-          className={`flex gap-2 w-full items-center ${flexCol ? 'flex-col' : 'flex-row'}`}
+          className="flex gap-2 w-full items-start flex-col"
           ref={ref}
           onClick={useStopPropagation().stopPropagation}
         >

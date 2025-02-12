@@ -101,7 +101,7 @@ export const ModalCardComp = ({ cardSelected }: modalProps) => {
 
           <div className="task-list text-gray-600 font-bold font-sans flex flex-col gap-2">
             <div
-              className={`task-list-header flex justify-between items-center mb-4 ${addButtonStates ? 'flex-col md:flex-row' : ''}`}
+              className={`task-list-header flex justify-between items-center mb-4 ${addButtonStates ? 'flex-col' : ''}`}
             >
               <span className="text-sm w-full">Tarefas:</span>
               <InputConditionComp

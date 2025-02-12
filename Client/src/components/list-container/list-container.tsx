@@ -137,7 +137,7 @@ export const ContainerCard = ({ cards, list }: ContainerCardProps) => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           ref={provided.innerRef}
-                          className="shadow flex flex-col p-2 gap-3 items-center drop-shadow-xl"
+                          className="shadow flex flex-col py-2 gap-3 items-center drop-shadow-xl"
                         >
                           <CardTodo key={card.id} card={card} />
                         </div>

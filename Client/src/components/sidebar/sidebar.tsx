@@ -130,7 +130,7 @@ export const Sidebar = () => {
                 style={style}
                 className={`z-20 absolute overflow-x-hiddenx' sidebar-content ${open ? 'sidebar-open' : 'sidebar-close'}`}
               >
-                <div className="box-project-wrapper px-6 pt-6 text-3xl font-bold text-white flex items-center justify-between">
+                <div className="box-project-wrapper text-sm px-6 pt-6 font-bold text-white flex items-center justify-between">
                   <h1>{userInfo?.name}</h1>
                   <button onClick={handleAddButton}>
                     <MoreSvg />
@@ -205,6 +205,7 @@ export const Sidebar = () => {
                                           clearButton: setEditingProjectId,
                                         })
                                       }
+                                      flexCol={true}
                                     >
                                       <p>{quadro.name}</p>
                                       <DropDownButton
